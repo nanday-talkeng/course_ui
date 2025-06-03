@@ -36,9 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.2
   percent_indicator: ^4.2.5
-  flutter_windowmanager: ^0.2.0
   youtube_player_flutter: ^9.1.1
-  flutter_in_app_pip: ^1.7.4
 
 dev_dependencies:
   flutter_test:

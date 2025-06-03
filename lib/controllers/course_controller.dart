@@ -78,7 +78,7 @@ class CourseController extends GetxController {
           'video': "30BrCz0KPNg",
         },
         {
-          'title': "Common questions related the role",
+          'title': "Common questions related the role. Long title UI Check",
           'duration': "12:23",
           'video': "hwQw0AXa4Ys",
         },

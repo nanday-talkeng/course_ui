@@ -84,15 +84,23 @@ class ProgressTile extends StatelessWidget {
                             color: Colors.green,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            subItem['title'],
-                            style: TextStyle(
-                              color: cc.currentVideo.value == subItem['video']
-                                  ? Colors.green
-                                  : Colors.black,
+                          Expanded(
+                            child: Obx(
+                              () => Text(
+                                subItem['title'],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color:
+                                      cc.currentVideo.value == subItem['video']
+                                      ? Colors.green
+                                      : Colors.black,
+                                ),
+                              ),
                             ),
                           ),
-                          Spacer(),
+
+                          const SizedBox(width: 16.0),
                           Text(subItem['duration']),
                         ],
                       ),

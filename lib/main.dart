@@ -1,9 +1,7 @@
-import 'package:course_ui/services/secure_screen.dart';
 import 'package:course_ui/view/home.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  secureScreen();
   runApp(const MyApp());
 }
 
