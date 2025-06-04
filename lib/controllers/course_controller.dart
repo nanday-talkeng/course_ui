@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:developer';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -10,17 +12,17 @@ class CourseController extends GetxController {
       'contents': [
         {
           'title': "Breaking down job descriptions",
-          'duration': "12:23",
+          'duration': 16.43,
           'video': "sCQ0VYNCmKw",
         },
         {
           'title': "Aligning skills with requirements",
-          'duration': "12:23",
+          'duration': 5.49,
           'video': "8bD1F97azDk",
         },
         {
           'title': "Common questions related the role",
-          'duration': "12:23",
+          'duration': 8.37,
           'video': "hwQw0AXa4Ys",
         },
       ],
@@ -31,13 +33,13 @@ class CourseController extends GetxController {
       'contents': [
         {
           'title': "How to start app Development",
-          'duration': "12:23",
+          'duration': 17.47,
           'video': "7nQsQ0rvYqQ",
         },
-        {'title': "Web Vs App", 'duration': "12:23", 'video': "vQcHPQJ4Ujs"},
+        {'title': "Web Vs App", 'duration': 12.20, 'video': "vQcHPQJ4Ujs"},
         {
           'title': "What is Web Development?",
-          'duration': "12:23",
+          'duration': 5.39,
           'video': "Ax83R9krXaw",
         },
       ],
@@ -48,17 +50,17 @@ class CourseController extends GetxController {
       'contents': [
         {
           'title': "Breaking down job descriptions",
-          'duration': "12:23",
+          'duration': 16.44,
           'video': "sCQ0VYNCmKw",
         },
         {
           'title': "Aligning skills with requirements",
-          'duration': "12:23",
+          'duration': 5.50,
           'video': "8bD1F97azDk",
         },
         {
           'title': "Common questions related the role",
-          'duration': "12:23",
+          'duration': 8.38,
           'video': "hwQw0AXa4Ys",
         },
       ],
@@ -69,17 +71,17 @@ class CourseController extends GetxController {
       'contents': [
         {
           'title': "Breaking down job descriptions",
-          'duration': "12:23",
+          'duration': 16.43,
           'video': "sCQ0VYNCmKw",
         },
         {
           'title': "Aligning skills with requirements",
-          'duration': "12:23",
-          'video': "30BrCz0KPNg",
+          'duration': 5.50,
+          'video': "8bD1F97azDk",
         },
         {
           'title': "Common questions related the role. Long title UI Check",
-          'duration': "12:23",
+          'duration': 8.38,
           'video': "hwQw0AXa4Ys",
         },
       ],
@@ -93,6 +95,28 @@ class CourseController extends GetxController {
 
   late YoutubePlayerController ytController;
 
+  Timer? _timer;
+  final RxInt seconds = 0.obs; // video played
+  final RxDouble secondsTotal = 0.0.obs;
+  final RxInt percentagePlayed = 0.obs; // video played
+
+  void startTimer() {
+    _timer ??= Timer.periodic(Duration(seconds: 1), (timer) {
+      seconds.value++; // 👈 Increment observable
+    });
+  }
+
+  void stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void restartTimer() {
+    stopTimer();
+    seconds.value = 0;
+    startTimer();
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -105,17 +129,21 @@ class CourseController extends GetxController {
     bool isVideoEndedHandled = false;
 
     ytController.addListener(() {
-      if (ytController.value.playerState == PlayerState.ended &&
+      if (ytController.value.playerState == PlayerState.playing) {
+        startTimer();
+        isVideoEndedHandled = false;
+      } else if (ytController.value.playerState == PlayerState.paused ||
+          ytController.value.playerState == PlayerState.buffering) {
+        stopTimer();
+      } else if (ytController.value.playerState == PlayerState.ended &&
           !isVideoEndedHandled) {
         isVideoEndedHandled = true; // Prevent multiple calls
-
-        onVideoEnded();
+        playNext();
       }
 
-      // Reset flag when a new video starts playing
-      if (ytController.value.playerState == PlayerState.playing) {
-        isVideoEndedHandled = false;
-      }
+      percentagePlayed.value = ((100 / secondsTotal.value) * seconds.value)
+          .toInt();
+      log(percentagePlayed.value.toString());
     });
 
     ever(currentVideo, (String id) {
@@ -123,24 +151,63 @@ class CourseController extends GetxController {
     });
   }
 
-  void changeVideo(String id) {
+  void changeVideo(String id, double duration) {
     currentVideo.value = id;
+    secondsTotal.value = (duration * 60.0);
   }
 
-  void onVideoEnded() {
-    if (subProgress.value <
-        data[currentProgress.value]['contents'].length - 1) {
-      subProgress.value += 1;
-      currentVideo.value =
-          data[currentProgress.value]['contents'][subProgress.value]['video'];
-    } else {
-      if (currentProgress.value < data.length - 1) {
-        currentProgress.value += 1;
-        subProgress.value = 0;
-        currentVideo.value =
-            data[currentProgress.value]['contents'][subProgress.value]['video'];
+  void playNext() {
+    if (percentagePlayed.value > 10) {
+      //Must play 10% of the video
+      if (subProgress.value <
+          data[currentProgress.value]['contents'].length - 1) {
+        subProgress.value += 1;
+        restartTimer();
+        changeVideo(
+          data[currentProgress.value]['contents'][subProgress.value]['video'],
+          data[currentProgress.value]['contents'][subProgress
+              .value]['duration'],
+        );
       } else {
-        log("All videos Finished");
+        if (currentProgress.value < data.length - 1) {
+          currentProgress.value += 1;
+          subProgress.value = 0;
+          restartTimer();
+          changeVideo(
+            data[currentProgress.value]['contents'][subProgress.value]['video'],
+            data[currentProgress.value]['contents'][subProgress
+                .value]['duration'],
+          );
+        } else {
+          stopTimer();
+          log("All videos Finished");
+        }
+      }
+    } else {
+      Fluttertoast.showToast(msg: "Must play atleast 10% of the video");
+    }
+  }
+
+  void playPrevious() {
+    if (subProgress.value > 0) {
+      subProgress.value -= 1;
+      restartTimer();
+      changeVideo(
+        data[currentProgress.value]['contents'][subProgress.value]['video'],
+        data[currentProgress.value]['contents'][subProgress.value]['duration'],
+      );
+    } else {
+      if (currentProgress.value > 0) {
+        currentProgress.value -= 1;
+        subProgress.value = 0;
+        restartTimer();
+        changeVideo(
+          data[currentProgress.value]['contents'][subProgress.value]['video'],
+          data[currentProgress.value]['contents'][subProgress
+              .value]['duration'],
+        );
+      } else {
+        log("you've reached top");
       }
     }
   }
@@ -148,6 +215,7 @@ class CourseController extends GetxController {
   @override
   void onClose() {
     ytController.dispose();
+    stopTimer();
     super.onClose();
   }
 }

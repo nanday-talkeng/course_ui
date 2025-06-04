@@ -70,7 +70,7 @@ class ProgressTile extends StatelessWidget {
                   onTap: () {
                     String videoId = subItem['video'];
                     cc.subProgress.value = index;
-                    cc.changeVideo(videoId);
+                    cc.changeVideo(videoId, subItem['duration']);
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -101,7 +101,14 @@ class ProgressTile extends StatelessWidget {
                           ),
 
                           const SizedBox(width: 16.0),
-                          Text(subItem['duration']),
+                          Text(
+                            subItem['duration'].toString().replaceAll(".", ":"),
+                            style: TextStyle(
+                              color: cc.currentVideo.value == subItem['video']
+                                  ? Colors.green
+                                  : Colors.black,
+                            ),
+                          ),
                         ],
                       ),
                     ),

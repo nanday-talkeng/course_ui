@@ -1,6 +1,6 @@
 import 'dart:developer';
-
 import 'package:course_ui/controllers/course_controller.dart';
+import 'package:course_ui/controllers/user_controller.dart';
 import 'package:course_ui/view/widgets/progress_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -12,13 +12,18 @@ class CourseScreen extends StatelessWidget {
   CourseScreen({super.key});
 
   final CourseController cc = Get.put(CourseController());
+  final UserController uc = Get.put(UserController());
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      cc.currentProgress.value = 0;
-      cc.subProgress.value = 0;
-      cc.changeVideo(cc.data[0]['contents'][0]['video']);
+      cc.currentProgress.value = uc.userProgress['current_stage'];
+      cc.subProgress.value = uc.userProgress['sub_stage'];
+
+      cc.changeVideo(
+        cc.data[0]['contents'][0]['video'],
+        cc.data[0]['contents'][0]['duration'],
+      );
       const platform = MethodChannel('com.example.course_ui/screen_security');
       try {
         await platform.invokeMethod('enableSecurity');
@@ -37,11 +42,54 @@ class CourseScreen extends StatelessWidget {
         builder: (context, player) {
           return Scaffold(
             backgroundColor: Colors.white,
-            appBar: AppBar(title: Text("Course Name")),
+            appBar: AppBar(
+              title: Text("Course Name"),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    //TODO Help/Support
+                  },
+                  icon: Icon(Icons.help_outline),
+                ),
+              ],
+            ),
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                player,
+                Stack(
+                  children: [
+                    player,
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              cc.playPrevious();
+                            },
+                            icon: Icon(
+                              Icons.skip_previous,
+                              color: Colors.white,
+                              size: 50,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              cc.playNext();
+                            },
+                            icon: Icon(
+                              Icons.skip_next,
+                              color: Colors.white,
+                              size: 50,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
@@ -49,13 +97,6 @@ class CourseScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //Obx(
-                          // () => Text("Progress: ${cc.currentProgress.value}"),
-                          //),
-                          //Obx(
-                          //  () => Text("Sub Progress: ${cc.subProgress.value}"),
-                          // ),
-                          // Obx(() => Text("Video Id: ${cc.currentVideo.value}")),
                           Text(
                             "Material",
                             style: TextStyle(fontWeight: FontWeight.bold),
