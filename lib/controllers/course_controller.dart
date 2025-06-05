@@ -3,95 +3,14 @@ import 'dart:developer';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../data/course_data.dart';
+import '../data/user_data.dart';
 
 class CourseController extends GetxController {
-  final List data = [
-    {
-      'title': "Preparing for the Interview",
-      'progress': 0,
-      'contents': [
-        {
-          'title': "Breaking down job descriptions",
-          'duration': 16.43,
-          'video': "sCQ0VYNCmKw",
-        },
-        {
-          'title': "Aligning skills with requirements",
-          'duration': 5.49,
-          'video': "8bD1F97azDk",
-        },
-        {
-          'title': "Common questions related the role",
-          'duration': 8.37,
-          'video': "hwQw0AXa4Ys",
-        },
-      ],
-    },
-    {
-      'title': "Understand the Role",
-      'progress': 25,
-      'contents': [
-        {
-          'title': "How to start app Development",
-          'duration': 17.47,
-          'video': "7nQsQ0rvYqQ",
-        },
-        {'title': "Web Vs App", 'duration': 12.20, 'video': "vQcHPQJ4Ujs"},
-        {
-          'title': "What is Web Development?",
-          'duration': 5.39,
-          'video': "Ax83R9krXaw",
-        },
-      ],
-    },
-    {
-      'title': "Learn More, Earn More",
-      'progress': 50,
-      'contents': [
-        {
-          'title': "Breaking down job descriptions",
-          'duration': 16.44,
-          'video': "sCQ0VYNCmKw",
-        },
-        {
-          'title': "Aligning skills with requirements",
-          'duration': 5.50,
-          'video': "8bD1F97azDk",
-        },
-        {
-          'title': "Common questions related the role",
-          'duration': 8.38,
-          'video': "hwQw0AXa4Ys",
-        },
-      ],
-    },
-    {
-      'title': "You are a Champ !",
-      'progress': 100,
-      'contents': [
-        {
-          'title': "Breaking down job descriptions",
-          'duration': 16.43,
-          'video': "sCQ0VYNCmKw",
-        },
-        {
-          'title': "Aligning skills with requirements",
-          'duration': 5.50,
-          'video': "8bD1F97azDk",
-        },
-        {
-          'title': "Common questions related the role. Long title UI Check",
-          'duration': 8.38,
-          'video': "hwQw0AXa4Ys",
-        },
-      ],
-    },
-  ];
-
   final RxInt currentProgress = 0.obs;
   final RxInt subProgress = 0.obs;
 
-  final RxString currentVideo = "qxOkaU6RVz4".obs;
+  final RxString currentVideo = "".obs;
 
   late YoutubePlayerController ytController;
 
@@ -118,9 +37,16 @@ class CourseController extends GetxController {
   }
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
 
+    currentProgress.value = userProgress['current_stage'];
+    subProgress.value = userProgress['sub_stage'];
+
+    currentVideo.value =
+        data[currentProgress.value]['contents'][subProgress.value]['video'];
+
+    log("Initial Video: ${data[0]['contents'][0]['video']}");
     ytController = YoutubePlayerController(
       initialVideoId: currentVideo.value,
       flags: const YoutubePlayerFlags(autoPlay: true),
@@ -141,8 +67,13 @@ class CourseController extends GetxController {
         playNext();
       }
 
-      percentagePlayed.value = ((100 / secondsTotal.value) * seconds.value)
-          .toInt();
+      if (secondsTotal.value > 0 && seconds.value >= 0) {
+        percentagePlayed.value = ((100 / secondsTotal.value) * seconds.value)
+            .toInt();
+      } else {
+        percentagePlayed.value = 0;
+      }
+
       log(percentagePlayed.value.toString());
     });
 
@@ -156,28 +87,51 @@ class CourseController extends GetxController {
     secondsTotal.value = (duration * 60.0);
   }
 
+  void startVideo() {
+    currentProgress.value = userProgress['current_stage'];
+    subProgress.value = userProgress['sub_stage'];
+
+    changeVideo(
+      data[0]['contents'][0]['video'],
+      data[0]['contents'][0]['duration'],
+    );
+  }
+
   void playNext() {
     if (percentagePlayed.value > 10) {
       //Must play 10% of the video
       if (subProgress.value <
           data[currentProgress.value]['contents'].length - 1) {
         subProgress.value += 1;
+
         restartTimer();
         changeVideo(
           data[currentProgress.value]['contents'][subProgress.value]['video'],
           data[currentProgress.value]['contents'][subProgress
               .value]['duration'],
         );
+
+        //Updating user progress
+        userProgress['sub_stage'] = subProgress;
+        userProgress['total_played'] += 1;
+        userProgress.refresh();
       } else {
         if (currentProgress.value < data.length - 1) {
           currentProgress.value += 1;
           subProgress.value = 0;
+
           restartTimer();
           changeVideo(
             data[currentProgress.value]['contents'][subProgress.value]['video'],
             data[currentProgress.value]['contents'][subProgress
                 .value]['duration'],
           );
+
+          //Updating user progress
+          userProgress['current_stage'] = currentProgress;
+          userProgress['sub_stage'] = subProgress;
+          userProgress['total_played'] += 1;
+          userProgress.refresh();
         } else {
           stopTimer();
           log("All videos Finished");

@@ -55,7 +55,9 @@ class ProgressTile extends StatelessWidget {
           ),
           title: Text("Stage ${index + 1}"),
           subtitle: Text(
-            item['title'],
+            item['title'] ?? '',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           children: [
