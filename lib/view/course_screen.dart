@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:course_ui/controllers/course_controller.dart';
-import 'package:course_ui/view/widgets/progress_tile.dart';
+import 'package:course_ui/view/progress_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/state_manager.dart';

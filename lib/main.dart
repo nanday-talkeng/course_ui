@@ -1,5 +1,5 @@
 import 'package:course_ui/firebase_options.dart';
-import 'package:course_ui/view/home.dart';
+import 'package:course_ui/view/SessionView/group_discussion.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       ),
-      home: MyHomePage(),
+      home: SessionList(),
     );
   }
 }
