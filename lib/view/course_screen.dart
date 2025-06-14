@@ -23,8 +23,6 @@ class CourseScreen extends StatelessWidget {
       } catch (e) {
         log("Error enabling screen security: $e");
       }
-
-      cc.restartTimer();
     });
     //WidgetsBinding.instance.addPostFrameCallback((_) async {
     // cc.currentProgress.value = uc.userProgress['current_stage'];
@@ -46,7 +44,6 @@ class CourseScreen extends StatelessWidget {
           controller: cc.ytController,
           onReady: () {
             log("YT Player ready");
-            cc.startTimer();
           },
         ),
         builder: (context, player) {
@@ -107,6 +104,7 @@ class CourseScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Obx(() => Text("${cc.percentagePlayed.value}%")),
                           Text(
                             "Material",
                             style: TextStyle(fontWeight: FontWeight.bold),
@@ -120,6 +118,7 @@ class CourseScreen extends StatelessWidget {
                                 SizedBox(height: 16.0),
                             itemBuilder: (context, index) {
                               Map item = data[index];
+
                               return ProgressTile(item: item, index: index);
                             },
                           ),

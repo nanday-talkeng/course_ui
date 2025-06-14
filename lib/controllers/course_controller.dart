@@ -14,27 +14,9 @@ class CourseController extends GetxController {
 
   late YoutubePlayerController ytController;
 
-  Timer? _timer;
   final RxInt seconds = 0.obs; // video played
   final RxDouble secondsTotal = 0.0.obs;
   final RxInt percentagePlayed = 0.obs; // video played
-
-  void startTimer() {
-    _timer ??= Timer.periodic(Duration(seconds: 1), (timer) {
-      seconds.value++; // 👈 Increment observable
-    });
-  }
-
-  void stopTimer() {
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  void restartTimer() {
-    stopTimer();
-    seconds.value = 0;
-    startTimer();
-  }
 
   @override
   Future<void> onInit() async {
@@ -56,22 +38,21 @@ class CourseController extends GetxController {
 
     ytController.addListener(() {
       if (ytController.value.playerState == PlayerState.playing) {
-        startTimer();
         isVideoEndedHandled = false;
+
+        percentagePlayed.value =
+            ((100 / secondsTotal.value) * ytController.value.position.inSeconds)
+                .toInt();
+
+        //TODO: the value of secondsTotal is staying 0 for the first video hence percentage is staying 0 and arithmetic error is coming
+
+        log("percentage: ${percentagePlayed.value}");
       } else if (ytController.value.playerState == PlayerState.paused ||
           ytController.value.playerState == PlayerState.buffering) {
-        stopTimer();
       } else if (ytController.value.playerState == PlayerState.ended &&
           !isVideoEndedHandled) {
         isVideoEndedHandled = true; // Prevent multiple calls
         playNext();
-      }
-
-      if (secondsTotal.value > 0 && seconds.value >= 0) {
-        percentagePlayed.value = ((100 / secondsTotal.value) * seconds.value)
-            .toInt();
-      } else {
-        percentagePlayed.value = 0;
       }
 
       log(percentagePlayed.value.toString());
@@ -98,13 +79,12 @@ class CourseController extends GetxController {
   }
 
   void playNext() {
-    if (percentagePlayed.value > 10) {
-      //Must play 10% of the video
+    if (percentagePlayed.value > 80) {
+      //Must play 80% of the video
       if (subProgress.value <
           data[currentProgress.value]['contents'].length - 1) {
         subProgress.value += 1;
 
-        restartTimer();
         changeVideo(
           data[currentProgress.value]['contents'][subProgress.value]['video'],
           data[currentProgress.value]['contents'][subProgress
@@ -120,7 +100,6 @@ class CourseController extends GetxController {
           currentProgress.value += 1;
           subProgress.value = 0;
 
-          restartTimer();
           changeVideo(
             data[currentProgress.value]['contents'][subProgress.value]['video'],
             data[currentProgress.value]['contents'][subProgress
@@ -133,19 +112,18 @@ class CourseController extends GetxController {
           userProgress['total_played'] += 1;
           userProgress.refresh();
         } else {
-          stopTimer();
           log("All videos Finished");
         }
       }
     } else {
-      Fluttertoast.showToast(msg: "Must play atleast 10% of the video");
+      Fluttertoast.showToast(msg: "Must play atleast 80% of the video");
     }
   }
 
   void playPrevious() {
     if (subProgress.value > 0) {
       subProgress.value -= 1;
-      restartTimer();
+
       changeVideo(
         data[currentProgress.value]['contents'][subProgress.value]['video'],
         data[currentProgress.value]['contents'][subProgress.value]['duration'],
@@ -154,7 +132,7 @@ class CourseController extends GetxController {
       if (currentProgress.value > 0) {
         currentProgress.value -= 1;
         subProgress.value = 0;
-        restartTimer();
+
         changeVideo(
           data[currentProgress.value]['contents'][subProgress.value]['video'],
           data[currentProgress.value]['contents'][subProgress
@@ -169,7 +147,7 @@ class CourseController extends GetxController {
   @override
   void onClose() {
     ytController.dispose();
-    stopTimer();
+
     super.onClose();
   }
 }

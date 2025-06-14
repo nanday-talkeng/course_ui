@@ -1,7 +1,9 @@
 import 'package:course_ui/firebase_options.dart';
-import 'package:course_ui/view/SessionView/group_discussion.dart';
+import 'package:course_ui/routes/app_pages.dart';
+import 'package:course_ui/routes/app_routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // <- Required before Firebase
@@ -15,13 +17,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       ),
-      home: SessionList(),
+      getPages: AppPages.pages,
+      initialRoute: AppRoutes.home,
     );
   }
 }

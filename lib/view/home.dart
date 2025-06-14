@@ -2,7 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:course_ui/controllers/list_controller.dart';
 import 'package:course_ui/data/course_data.dart';
 import 'package:course_ui/data/user_data.dart';
-import 'package:course_ui/view/course_overview.dart';
+import 'package:course_ui/models/course_model.dart';
+import 'package:course_ui/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,35 +21,32 @@ class MyHomePage extends StatelessWidget {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Obx(
           () => lc.courseList.isEmpty
               ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
+              : ListView.separated(
                   itemCount: lc.courseList.length,
+                  separatorBuilder: (context, index) => SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    var item = lc.courseList[index];
+                    final CourseModel item = CourseModel.fromJson(
+                      lc.courseList[index],
+                    );
+
                     return InkWell(
                       onTap: () {
-                        data.value = item['data'];
+                        data.value = item.data;
 
                         for (var c in lc.courses) {
-                          if (c['id'] == item['id']) {
+                          if (c['id'] == item.id) {
                             userProgress.value = c as Map<String, dynamic>;
                           }
                         }
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CourseOverview(courseData: item),
-                          ),
-                        );
+                        Get.toNamed(AppRoutes.courseOverview, arguments: item);
                       },
                       child: Container(
                         width: double.infinity,
-
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(color: Colors.grey.withAlpha(85)),
@@ -63,49 +61,51 @@ class MyHomePage extends StatelessWidget {
                                 bottomLeft: Radius.circular(8),
                               ),
                               child: CachedNetworkImage(
-                                imageUrl: item['image'],
+                                imageUrl: item.image,
                                 fit: BoxFit.cover,
                                 height: 100,
                                 width: 120,
                               ),
                             ),
                             const SizedBox(width: 12.0),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['type'],
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.type,
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  item['title'],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                  Text(
+                                    item.title,
+                                    style: TextStyle(
+                                      height: 1.2,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  "By ${item['course_by']}",
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
+                                  Text(
+                                    "By ${item.courseBy}",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 8.0),
-                                Text(
-                                  "${item['rating']}⭐",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                                  SizedBox(height: 8.0),
+                                  Text(
+                                    "${item.rating}⭐",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                            Spacer(),
                             Icon(
                               Icons.arrow_forward_ios_rounded,
                               color: Colors.grey,
