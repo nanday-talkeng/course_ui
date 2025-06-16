@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:course_ui/data/user_data.dart';
 import 'package:get/get.dart';
 
 class ListController extends GetxController {
@@ -9,7 +10,7 @@ class ListController extends GetxController {
   @override
   void onInit() {
     getCourseList();
-    getUserCourses();
+    getUserData();
     super.onInit();
   }
 
@@ -23,26 +24,19 @@ class ListController extends GetxController {
         }
       });
     } catch (e) {
-      log(e.toString());
+      log("getCourseList exception: $e");
     }
   }
 
-  final RxList courses = [].obs;
-
-  void getUserCourses() async {
-    courses.clear();
-
+  void getUserData() async {
     try {
       await _firestore
           .collection("Users")
           .doc("Din7wKdWg8GSRbY784aS")
           .get()
           .then((snapshot) {
-            for (var i in snapshot.data()!['courses']) {
-              courses.add(i);
-            }
+            userData.value = snapshot.data()!;
           });
-      log(courses.toString());
     } catch (e) {
       log("getUserData exception: $e");
     }

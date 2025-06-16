@@ -22,13 +22,12 @@ class CourseController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
 
-    currentProgress.value = userProgress['current_stage'];
-    subProgress.value = userProgress['sub_stage'];
+    currentProgress.value = currentCourse['current_stage'];
+    subProgress.value = currentCourse['sub_stage'];
 
     currentVideo.value =
         data[currentProgress.value]['contents'][subProgress.value]['video'];
 
-    log("Initial Video: ${data[0]['contents'][0]['video']}");
     ytController = YoutubePlayerController(
       initialVideoId: currentVideo.value,
       flags: const YoutubePlayerFlags(autoPlay: true),
@@ -43,10 +42,6 @@ class CourseController extends GetxController {
         percentagePlayed.value =
             ((100 / secondsTotal.value) * ytController.value.position.inSeconds)
                 .toInt();
-
-        //TODO: the value of secondsTotal is staying 0 for the first video hence percentage is staying 0 and arithmetic error is coming
-
-        log("percentage: ${percentagePlayed.value}");
       } else if (ytController.value.playerState == PlayerState.paused ||
           ytController.value.playerState == PlayerState.buffering) {
       } else if (ytController.value.playerState == PlayerState.ended &&
@@ -54,8 +49,6 @@ class CourseController extends GetxController {
         isVideoEndedHandled = true; // Prevent multiple calls
         playNext();
       }
-
-      log(percentagePlayed.value.toString());
     });
 
     ever(currentVideo, (String id) {
@@ -64,13 +57,14 @@ class CourseController extends GetxController {
   }
 
   void changeVideo(String id, double duration) {
+    log("Changing video");
     currentVideo.value = id;
     secondsTotal.value = (duration * 60.0);
   }
 
   void startVideo() {
-    currentProgress.value = userProgress['current_stage'];
-    subProgress.value = userProgress['sub_stage'];
+    currentProgress.value = currentCourse['current_stage'];
+    subProgress.value = currentCourse['sub_stage'];
 
     changeVideo(
       data[0]['contents'][0]['video'],
@@ -92,9 +86,9 @@ class CourseController extends GetxController {
         );
 
         //Updating user progress
-        userProgress['sub_stage'] = subProgress;
-        userProgress['total_played'] += 1;
-        userProgress.refresh();
+        currentCourse['sub_stage'] = subProgress;
+        currentCourse['total_played'] += 1;
+        currentCourse.refresh();
       } else {
         if (currentProgress.value < data.length - 1) {
           currentProgress.value += 1;
@@ -107,10 +101,10 @@ class CourseController extends GetxController {
           );
 
           //Updating user progress
-          userProgress['current_stage'] = currentProgress;
-          userProgress['sub_stage'] = subProgress;
-          userProgress['total_played'] += 1;
-          userProgress.refresh();
+          currentCourse['current_stage'] = currentProgress;
+          currentCourse['sub_stage'] = subProgress;
+          currentCourse['total_played'] += 1;
+          currentCourse.refresh();
         } else {
           log("All videos Finished");
         }
@@ -131,7 +125,7 @@ class CourseController extends GetxController {
     } else {
       if (currentProgress.value > 0) {
         currentProgress.value -= 1;
-        subProgress.value = 0;
+        subProgress.value = data[currentProgress.value]['contents'].length - 1;
 
         changeVideo(
           data[currentProgress.value]['contents'][subProgress.value]['video'],

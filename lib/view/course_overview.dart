@@ -141,7 +141,7 @@ class CourseOverview extends StatelessWidget {
                               ),
                               itemBuilder: (context, index) {
                                 final Map item = courseData.data[index];
-                                return userProgress['current_stage'] > index
+                                return currentCourse['current_stage'] > index
                                     ? CircleAvatar(
                                         radius: 20,
                                         backgroundColor: Colors.teal,
@@ -151,7 +151,7 @@ class CourseOverview extends StatelessWidget {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : userProgress['current_stage'] != index
+                                    : currentCourse['current_stage'] != index
                                     ? CircleAvatar(
                                         radius: 20,
                                         backgroundColor: Colors.grey,

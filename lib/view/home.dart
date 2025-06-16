@@ -37,14 +37,22 @@ class MyHomePage extends StatelessWidget {
                       onTap: () {
                         data.value = item.data;
 
-                        for (var c in lc.courses) {
-                          if (c['id'] == item.id) {
-                            userProgress.value = c as Map<String, dynamic>;
-                          }
-                        }
+                        currentCourse.value = (userData['courses'] as List)
+                            .cast<Map<String, dynamic>>()
+                            .firstWhere(
+                              (c) => c['id'] == item.id,
+                              orElse: () => {
+                                "current_stage": 0,
+                                "sub_stage": 0,
+                                "finished": false,
+                                "id": item.id,
+                                "total_played": 0,
+                              }, // Assign empty map if not found
+                            );
 
                         Get.toNamed(AppRoutes.courseOverview, arguments: item);
                       },
+
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(

@@ -4,6 +4,7 @@ import 'package:course_ui/const/colors.dart';
 import 'package:course_ui/controllers/review_controller.dart';
 import 'package:course_ui/data/user_data.dart';
 import 'package:course_ui/models/course_model.dart';
+import 'package:course_ui/models/review_model.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,8 @@ class ReviewList extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) =>
                     Center(child: Text("Something went wrong")),
                 itemBuilder: (context, doc) {
-                  final Map review = doc.data();
+                  final ReviewModel review = ReviewModel.fromJson(doc.data());
+
                   return reviewCard(context, review);
                 },
               ),
@@ -85,7 +87,7 @@ class ReviewList extends StatelessWidget {
     );
   }
 
-  Widget reviewCard(BuildContext context, Map review) {
+  Widget reviewCard(BuildContext context, ReviewModel review) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -103,7 +105,7 @@ class ReviewList extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadiusGeometry.circular(40),
                   child: CachedNetworkImage(
-                    imageUrl: review['image'],
+                    imageUrl: review.image,
                     fit: BoxFit.cover,
                     height: 38,
                     width: 38,
@@ -119,7 +121,7 @@ class ReviewList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${review['name'] ?? ""}",
+                        review.name,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -128,19 +130,19 @@ class ReviewList extends StatelessWidget {
                       Row(
                         children: [
                           StarRating(
-                            rating: review['rating'].toDouble() ?? 0,
+                            rating: review.rating.toDouble(),
                             color: Colors.amber,
                             mainAxisAlignment: MainAxisAlignment.start,
                           ),
                           Text(
-                            " ${review['rating']}",
+                            " ${review.rating}",
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                           Spacer(),
                           Text(
                             DateFormat(
                               'dd MMMM yyyy',
-                            ).format(review['time'].toDate()),
+                            ).format(review.time.toDate()),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -155,26 +157,23 @@ class ReviewList extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              review['review'] ?? "",
-              maxLines: 5,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(review.review, maxLines: 5, overflow: TextOverflow.ellipsis),
 
             Visibility(
-              visible: review['uid'] == userData['uid'],
+              visible: review.uid == userId,
               child: InkWell(
                 onTap: () {
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
+                    enableDrag: true,
                     builder: (context) {
-                      rc.reviewText.text = review['review'];
-                      rc.starRating.value = review['rating'];
+                      rc.reviewText.text = review.review;
+                      rc.starRating.value = review.rating;
                       return WriteReviewBottomsheet(
                         course: course,
                         taskType: "Edit",
-                        oldReview: review['rating'],
+                        oldReview: review.rating,
                       );
                     },
                   );

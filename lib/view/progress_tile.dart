@@ -69,11 +69,11 @@ class ProgressTile extends StatelessWidget {
               itemBuilder: (context, index) {
                 final Map subItem = item['contents'][index];
                 return InkWell(
-                  onTap: () {
-                    String videoId = subItem['video'];
-                    cc.subProgress.value = index;
-                    cc.changeVideo(videoId, subItem['duration']);
-                  },
+                  // onTap: () {
+                  //   String videoId = subItem['video'];
+                  //   cc.subProgress.value = index;
+                  //   cc.changeVideo(videoId, subItem['duration']);
+                  // },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                     child: Obx(

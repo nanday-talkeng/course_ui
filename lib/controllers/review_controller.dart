@@ -37,7 +37,7 @@ class ReviewController extends GetxController {
           .collection("Courses")
           .doc(course.id)
           .collection("reviews")
-          .doc(userData['uid'])
+          .doc(userId)
           .set({
             "rating": newRating,
             "review": reviewText.text.trim(),

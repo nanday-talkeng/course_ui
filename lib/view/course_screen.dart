@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:course_ui/controllers/course_controller.dart';
+import 'package:course_ui/data/user_data.dart';
 import 'package:course_ui/view/progress_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -11,7 +12,6 @@ import '../data/course_data.dart';
 class CourseScreen extends StatelessWidget {
   CourseScreen({super.key});
 
-  // final CourseController cc = Get.find();
   final CourseController cc = Get.put(CourseController());
 
   @override
@@ -23,16 +23,16 @@ class CourseScreen extends StatelessWidget {
       } catch (e) {
         log("Error enabling screen security: $e");
       }
-    });
-    //WidgetsBinding.instance.addPostFrameCallback((_) async {
-    // cc.currentProgress.value = uc.userProgress['current_stage'];
-    // cc.subProgress.value = uc.userProgress['sub_stage'];
 
-    // cc.changeVideo(
-    //   cc.data[0]['contents'][0]['video'],
-    //   cc.data[0]['contents'][0]['duration'],
-    // );
-    //});
+      cc.currentProgress.value = currentCourse['current_stage'];
+      cc.subProgress.value = currentCourse['sub_stage'];
+
+      cc.changeVideo(
+        data[currentCourse['current_stage']]['contents'][currentCourse['sub_stage']]['video'],
+        data[currentCourse['current_stage']]['contents'][currentCourse['sub_stage']]['duration'],
+      );
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {});
     return PopScope(
       onPopInvokedWithResult: (didPop, result) async {
         const platform = MethodChannel('com.example.course_ui/screen_security');
