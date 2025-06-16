@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -7,6 +8,8 @@ import '../data/course_data.dart';
 import '../data/user_data.dart';
 
 class CourseController extends GetxController {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final RxInt currentProgress = 0.obs;
   final RxInt subProgress = 0.obs;
 
@@ -72,7 +75,7 @@ class CourseController extends GetxController {
     );
   }
 
-  void playNext() {
+  void playNext() async {
     if (percentagePlayed.value > 80) {
       //Must play 80% of the video
       if (subProgress.value <
@@ -101,12 +104,53 @@ class CourseController extends GetxController {
           );
 
           //Updating user progress
-          currentCourse['current_stage'] = currentProgress;
-          currentCourse['sub_stage'] = subProgress;
+          currentCourse['current_stage'] = currentProgress.value;
+          currentCourse['sub_stage'] = subProgress.value;
           currentCourse['total_played'] += 1;
           currentCourse.refresh();
+
+          try {
+            //Updating if user finished course
+            await _firestore //TODO
+                .collection("user_course_progress")
+                .doc(userId)
+                .set({
+                  courseId.value: {
+                    "id": courseId.value,
+                    "current_stage": currentProgress.value,
+                    "sub_stage": subProgress.value,
+                    "finished": false,
+                    "total_played": FieldValue.increment(1),
+                  },
+                }, SetOptions(merge: true))
+                .then((_) {
+                  log("course progress updated");
+                });
+          } catch (e) {
+            log("Updating next video exception $e");
+          }
         } else {
           log("All videos Finished");
+          try {
+            //Updating if user finished course
+            await _firestore //TODO
+                .collection("user_course_progress")
+                .doc(userId)
+                .set({
+                  courseId.value: {
+                    "id": courseId.value,
+                    "current_stage": currentProgress.value,
+                    "sub_stage": subProgress.value,
+                    "finished": true,
+                    "total_played": FieldValue.increment(1),
+                  },
+                }, SetOptions(merge: true))
+                .then((_) {
+                  log("course finish updated");
+                });
+          } catch (e) {
+            log("Setting course complete exception: $e");
+          }
         }
       }
     } else {
@@ -141,7 +185,6 @@ class CourseController extends GetxController {
   @override
   void onClose() {
     ytController.dispose();
-
     super.onClose();
   }
 }

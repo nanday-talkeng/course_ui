@@ -11,6 +11,7 @@ class ListController extends GetxController {
   void onInit() {
     getCourseList();
     getUserData();
+    getUserCourses();
     super.onInit();
   }
 
@@ -30,15 +31,33 @@ class ListController extends GetxController {
 
   void getUserData() async {
     try {
-      await _firestore
-          .collection("Users")
-          .doc("Din7wKdWg8GSRbY784aS")
-          .get()
-          .then((snapshot) {
-            userData.value = snapshot.data()!;
-          });
+      await _firestore.collection("Users").doc(userId).get().then((snapshot) {
+        userData.value = snapshot.data()!;
+      });
     } catch (e) {
       log("getUserData exception: $e");
+    }
+  }
+
+  RxList<Map> userCourseProgress = <Map>[].obs;
+
+  void getUserCourses() async {
+    userCourseProgress.clear();
+
+    try {
+      await _firestore
+          .collection("user_course_progress")
+          .doc(userId)
+          .get()
+          .then((snapshot) {
+            userCourseProgress.value = snapshot.data()!.entries.map((entry) {
+              return {"uid": entry.key, ...entry.value};
+            }).toList();
+
+            log("getUserCourses: $userCourseProgress");
+          });
+    } catch (e) {
+      log("getUserCourses exception: $e");
     }
   }
 }

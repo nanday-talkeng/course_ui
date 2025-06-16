@@ -37,8 +37,7 @@ class MyHomePage extends StatelessWidget {
                       onTap: () {
                         data.value = item.data;
 
-                        currentCourse.value = (userData['courses'] as List)
-                            .cast<Map<String, dynamic>>()
+                        currentCourse.value = (lc.userCourseProgress as List)
                             .firstWhere(
                               (c) => c['id'] == item.id,
                               orElse: () => {
@@ -49,6 +48,8 @@ class MyHomePage extends StatelessWidget {
                                 "total_played": 0,
                               }, // Assign empty map if not found
                             );
+
+                        courseId.value = item.id;
 
                         Get.toNamed(AppRoutes.courseOverview, arguments: item);
                       },
