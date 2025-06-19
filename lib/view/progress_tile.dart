@@ -4,10 +4,16 @@ import 'package:get/get.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class ProgressTile extends StatelessWidget {
-  ProgressTile({super.key, required this.item, required this.index});
+  ProgressTile({
+    super.key,
+    required this.item,
+    required this.index,
+    required this.length,
+  });
 
-  final int index;
   final Map item;
+  final int index;
+  final int length;
 
   final CourseController cc = Get.put(CourseController());
 
@@ -41,9 +47,9 @@ class ProgressTile extends StatelessWidget {
                 : CircularPercentIndicator(
                     radius: 24.0,
                     lineWidth: 5.0,
-                    percent: item['progress'] / 100,
+                    percent: (index * (100 / (length - 1))) / 100,
                     center: Text(
-                      "${item['progress']}%",
+                      "${(index * (100 / (length - 1))).toStringAsFixed(0)}%",
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -69,11 +75,6 @@ class ProgressTile extends StatelessWidget {
               itemBuilder: (context, index) {
                 final Map subItem = item['contents'][index];
                 return InkWell(
-                  // onTap: () {
-                  //   String videoId = subItem['video'];
-                  //   cc.subProgress.value = index;
-                  //   cc.changeVideo(videoId, subItem['duration']);
-                  // },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                     child: Obx(

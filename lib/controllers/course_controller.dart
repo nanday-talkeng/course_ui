@@ -75,7 +75,7 @@ class CourseController extends GetxController {
     );
   }
 
-  void playNext() async {
+  Future<void> playNext() async {
     if (percentagePlayed.value > 80) {
       //Must play 80% of the video
       if (subProgress.value <

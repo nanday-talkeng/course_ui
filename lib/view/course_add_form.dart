@@ -11,137 +11,219 @@ class CourseAddForm extends StatelessWidget {
   final CourseAddController cac = Get.put(CourseAddController());
   final _formKey = GlobalKey<FormState>();
 
-  final String type = Get.arguments;
+  final String type = Get.arguments; // Add / id(for Edit)
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text("$type Course"),
+        title: Text("${type == "Add" ? "Add" : "Edit"} Course"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 64),
-                child: InkWell(
-                  onTap: () {},
-                  child: AspectRatio(
-                    aspectRatio: 4 / 3,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Obx(
-                        () => cac.imageUrl.value == ""
-                            ? Container(
-                                decoration: BoxDecoration(color: Colors.grey),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.add_rounded,
-                                        color: Colors.white,
-                                      ),
-                                      Text(
-                                        "Upload an Image",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 64),
+                  child: InkWell(
+                    onTap: () {},
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Obx(
+                          () => cac.imageUrl.value == ""
+                              ? Container(
+                                  decoration: BoxDecoration(color: Colors.grey),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.add_rounded,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          "Upload an Image",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                )
+                              : CachedNetworkImage(
+                                  imageUrl: cac.imageUrl.value,
+                                  fit: BoxFit.cover,
                                 ),
-                              )
-                            : CachedNetworkImage(
-                                imageUrl: cac.imageUrl.value,
-                                fit: BoxFit.cover,
-                              ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: cac.titleController,
-                decoration: InputDecoration(
-                  labelText: "Title",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'This field is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: cac.typeController,
-                decoration: InputDecoration(
-                  labelText: "Type",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'This field is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: cac.descriptionController,
-                decoration: InputDecoration(
-                  labelText: "Description",
-
-                  border: OutlineInputBorder(),
-                ),
-
-                maxLines: 4,
-                minLines: 1,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'This field is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: cac.courseByController,
-                decoration: InputDecoration(
-                  labelText: "Course By",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'This field is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 45,
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // cac.addCourse();
-                      Get.toNamed(AppRoutes.manageChapters);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: cac.titleController,
+                  decoration: InputDecoration(
+                    labelText: "Title",
+                    border: OutlineInputBorder(),
                   ),
-                  child: Text("Next ($type Videos)"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'This field is required';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: cac.typeController,
+                  decoration: InputDecoration(
+                    labelText: "Type",
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'This field is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: cac.descriptionController,
+                  decoration: InputDecoration(
+                    labelText: "Description",
+
+                    border: OutlineInputBorder(),
+                  ),
+
+                  maxLines: 4,
+                  minLines: 1,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'This field is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: cac.courseByController,
+                  decoration: InputDecoration(
+                    labelText: "Course By",
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'This field is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                Text("Tags"),
+                Obx(
+                  () => Wrap(
+                    spacing: 8.0,
+                    runSpacing: 2.0,
+                    children: cac.tags.map((tag) {
+                      return InputChip(
+                        label: Text(tag),
+                        deleteIcon: Icon(Icons.close),
+                        onDeleted: () {
+                          cac.tags.remove(tag);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: cac.tagAdd,
+
+                        decoration: InputDecoration(
+                          hintText: "Tag",
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 8,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      height: 45,
+                      width: 100,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (cac.tagAdd.text != "") {
+                            cac.tags.add(cac.tagAdd.text);
+                            cac.tagAdd.clear();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text("Add"),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text("Features"),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: cac.features.length,
+                  padding: EdgeInsets.all(0),
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    var feature = cac.features[index];
+                    return ListTile(
+                      dense: true,
+                      title: Text(feature.title),
+                      subtitle: Text(feature.sub),
+                      trailing: IconButton(
+                        onPressed: () {
+                          cac.features.removeAt(index);
+                          cac.features.refresh();
+                        },
+                        icon: Icon(Icons.close),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 45,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        Get.toNamed(AppRoutes.manageChapters, arguments: type);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(
+                      "Next (${type == "Add" ? "Add" : "Edit"} Videos)",
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'package:course_ui/controllers/course_controller.dart';
 import 'package:course_ui/data/user_data.dart';
+import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/view/progress_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/state_manager.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -12,6 +14,7 @@ import '../data/course_data.dart';
 class CourseScreen extends StatelessWidget {
   CourseScreen({super.key});
 
+  final CourseModel course = Get.arguments;
   final CourseController cc = Get.put(CourseController());
 
   @override
@@ -119,7 +122,11 @@ class CourseScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               Map item = data[index];
 
-                              return ProgressTile(item: item, index: index);
+                              return ProgressTile(
+                                item: item,
+                                index: index,
+                                length: data.length,
+                              );
                             },
                           ),
                         ],

@@ -1,7 +1,6 @@
 import 'package:course_ui/controllers/review_controller.dart';
 import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/routes/app_routes.dart';
-import 'package:course_ui/view/course_screen.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
@@ -23,7 +22,7 @@ class CourseOverview extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Course Name"),
+        title: Text("Course Overview"),
         backgroundColor: Colors.white,
       ),
       body: Padding(
@@ -140,7 +139,6 @@ class CourseOverview extends StatelessWidget {
                                 ),
                               ),
                               itemBuilder: (context, index) {
-                                final Map item = courseData.data[index];
                                 return currentCourse['current_stage'] > index
                                     ? CircleAvatar(
                                         radius: 20,
@@ -164,9 +162,14 @@ class CourseOverview extends StatelessWidget {
                                     : CircularPercentIndicator(
                                         radius: 20.0,
                                         lineWidth: 5.0,
-                                        percent: item['progress'] / 100,
+                                        percent:
+                                            (index *
+                                                (100 /
+                                                    (courseData.data.length -
+                                                        1))) /
+                                            100,
                                         center: Text(
-                                          "${item['progress']}%",
+                                          "${(index * (100 / (courseData.data.length - 1))).toStringAsFixed(0)}%",
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
@@ -329,10 +332,7 @@ class CourseOverview extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CourseScreen()),
-                  );
+                  Get.toNamed(AppRoutes.courseScreen, arguments: courseData);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,

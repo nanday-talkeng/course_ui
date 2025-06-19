@@ -12,7 +12,11 @@ class ReviewController extends GetxController {
   final RxDouble starRating = 0.0.obs;
   final TextEditingController reviewText = TextEditingController();
 
-  void submitReview(CourseModel course, String type, double? oldRating) async {
+  Future<void> submitReview(
+    CourseModel course,
+    String type,
+    double? oldRating,
+  ) async {
     try {
       final double newRating = starRating.value;
       final int currentCount = course.ratingCount;

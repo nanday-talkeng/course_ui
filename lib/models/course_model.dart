@@ -100,4 +100,8 @@ class FeatureModel {
       title: json['title'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {'sub': sub, 'icon': icon, 'title': title};
+  }
 }

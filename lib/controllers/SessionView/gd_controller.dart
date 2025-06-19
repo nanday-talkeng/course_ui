@@ -86,7 +86,7 @@ class GdController extends GetxController {
     sessionList.refresh();
   }
 
-  void markAsComplete(String id) async {
+  Future<void> markAsComplete(String id) async {
     try {
       await FirebaseFirestore.instance
           .collection("sessions")
@@ -102,7 +102,7 @@ class GdController extends GetxController {
 
   final RxString selectedFilter = "".obs;
 
-  void resetAllFilter() async {
+  Future<void> resetAllFilter() async {
     collectionRef.value = FirebaseFirestore.instance
         .collection("sessions")
         .orderBy("scheduleTime");

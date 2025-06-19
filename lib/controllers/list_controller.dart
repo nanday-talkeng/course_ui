@@ -17,7 +17,7 @@ class ListController extends GetxController {
 
   final RxList courseList = [].obs;
 
-  void getCourseList() async {
+  Future<void> getCourseList() async {
     try {
       await _firestore.collection("Courses").get().then((snapshot) {
         for (var s in snapshot.docs) {
@@ -29,7 +29,7 @@ class ListController extends GetxController {
     }
   }
 
-  void getUserData() async {
+  Future<void> getUserData() async {
     try {
       await _firestore.collection("Users").doc(userId).get().then((snapshot) {
         userData.value = snapshot.data()!;
@@ -41,7 +41,7 @@ class ListController extends GetxController {
 
   RxList<Map> userCourseProgress = <Map>[].obs;
 
-  void getUserCourses() async {
+  Future<void> getUserCourses() async {
     userCourseProgress.clear();
 
     try {

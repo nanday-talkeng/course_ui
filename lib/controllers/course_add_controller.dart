@@ -12,8 +12,13 @@ class CourseAddController extends GetxController {
   final TextEditingController typeController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController courseByController = TextEditingController();
+  final TextEditingController tagAdd = TextEditingController();
 
   final TextEditingController chapterTitleController = TextEditingController();
+
+  final TextEditingController videoTitleController = TextEditingController();
+  final TextEditingController videoIdController = TextEditingController();
+  final TextEditingController videoDurationController = TextEditingController();
 
   final RxString imageUrl = "".obs;
   final RxList<String> tags = <String>[].obs;
@@ -34,18 +39,43 @@ class CourseAddController extends GetxController {
             "description": descriptionController.text,
             "type": typeController.text,
             "course_by": courseByController.text,
-            "features": features,
+            "features": features.map((e) => e.toJson()).toList(),
             "tags": tags,
             "image": imageUrl.value,
             "rating": 5,
             "rating_count": 0,
-            "data": [],
-          })
+            "data": chapters,
+          }, SetOptions(merge: true))
           .then((_) {
             clearTextFields();
+            Get.offAllNamed(AppRoutes.home);
           });
     } catch (e) {
       log("addCourse exception: $e");
+    }
+  }
+
+  Future<void> editCourseDetails(String id) async {
+    try {
+      await _firestore
+          .collection("Courses")
+          .doc(id)
+          .set({
+            "title": titleController.text,
+            "description": descriptionController.text,
+            "type": typeController.text,
+            "course_by": courseByController.text,
+            "features": features.map((e) => e.toJson()).toList(),
+            "tags": tags,
+            "image": imageUrl.value,
+            "data": chapters,
+          }, SetOptions(merge: true))
+          .then((_) {
+            clearTextFields();
+            Get.offAllNamed(AppRoutes.home);
+          });
+    } catch (e) {
+      log("editCourseDetails exception: $e");
     }
   }
 
@@ -68,7 +98,7 @@ class CourseAddController extends GetxController {
 
     chapters.assignAll(course.data.cast<Map<String, dynamic>>());
 
-    Get.toNamed(AppRoutes.courseAddForm, arguments: "Edit");
+    Get.toNamed(AppRoutes.courseAddForm, arguments: course.id);
   }
 
   void clearTextFields() {
@@ -81,5 +111,15 @@ class CourseAddController extends GetxController {
     imageUrl.value = "";
     tags.clear();
     features.clear();
+  }
+
+  String? extractYoutubeVideoId(String url) {
+    final RegExp regExp = RegExp(
+      r'(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([0-9A-Za-z_-]{11})',
+      caseSensitive: false,
+    );
+
+    final match = regExp.firstMatch(url);
+    return match?.group(1);
   }
 }
