@@ -1,27 +1,28 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:course_ui/const/colors.dart';
 import 'package:course_ui/controllers/review_controller.dart';
 import 'package:course_ui/data/user_data.dart';
 import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/models/review_model.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
-import 'package:get/instance_manager.dart';
-import 'package:get/route_manager.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class ReviewList extends StatelessWidget {
   ReviewList({super.key});
 
   final CourseModel course = Get.arguments;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ReviewController rc = Get.put(ReviewController());
+
+  final RxInt selectedStar = 0.obs;
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration.zero).then((_) {
+      rc.getReviewList(course.id);
+    });
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -30,26 +31,102 @@ class ReviewList extends StatelessWidget {
       ),
       body: Column(
         children: [
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              itemCount: 6,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.only(left: 8),
+              itemBuilder: (context, index) {
+                return Center(
+                  child: InkWell(
+                    onTap: () {
+                      selectedStar.value = index;
+                    },
+                    borderRadius: BorderRadius.circular(40),
+                    child: Obx(
+                      () => Container(
+                        width: 64,
+                        decoration: BoxDecoration(
+                          color: selectedStar.value == index
+                              ? primaryColor
+                              : Colors.grey.withAlpha(60),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        margin: EdgeInsets.symmetric(horizontal: 4),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Icon(
+                              Icons.star_rounded,
+                              size: 20,
+                              color: selectedStar.value == index
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                            Text(
+                              index == 0 ? "All" : index.toString(),
+                              style: TextStyle(
+                                color: selectedStar.value == index
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: selectedStar.value == index
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Text("Comment"),
+                Spacer(),
+                Text(
+                  "⭐${course.rating}",
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text("(${course.ratingCount})"),
+              ],
+            ),
+          ),
           Expanded(
-            child: Scrollbar(
-              radius: Radius.circular(16),
-              child: FirestoreListView(
-                query: _firestore
-                    .collection("Courses")
-                    .doc(course.id)
-                    .collection("reviews")
-                    .orderBy("time", descending: true),
-                padding: EdgeInsets.symmetric(vertical: 6),
-                emptyBuilder: (context) =>
-                    Center(child: Text("No reviews found")),
-                errorBuilder: (context, error, stackTrace) =>
-                    Center(child: Text("Something went wrong")),
-                itemBuilder: (context, doc) {
-                  final ReviewModel review = ReviewModel.fromJson(doc.data());
-
-                  return reviewCard(context, review);
-                },
-              ),
+            child: Obx(
+              () => rc.isLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : Scrollbar(
+                      radius: Radius.circular(16),
+                      child: ListView.builder(
+                        itemCount: rc.reviewList.length,
+                        itemBuilder: (context, index) {
+                          final ReviewModel review = ReviewModel.fromJson(
+                            rc.reviewList[index],
+                          );
+                          return Obx(
+                            () => selectedStar.value == 0
+                                ? reviewCard(context, review)
+                                : selectedStar.value == review.rating
+                                ? reviewCard(context, review)
+                                : SizedBox(),
+                          );
+                        },
+                      ),
+                    ),
             ),
           ),
           Padding(

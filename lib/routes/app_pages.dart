@@ -1,3 +1,4 @@
+import 'package:course_ui/view/certificate_screen.dart';
 import 'package:course_ui/view/course_add_form.dart';
 import 'package:course_ui/view/course_overview.dart';
 import 'package:course_ui/view/course_screen.dart';
@@ -13,6 +14,7 @@ class AppPages {
     GetPage(name: AppRoutes.courseOverview, page: () => CourseOverview()),
     GetPage(name: AppRoutes.courseScreen, page: () => CourseScreen()),
     GetPage(name: AppRoutes.courseReviews, page: () => ReviewList()),
+    GetPage(name: AppRoutes.certificateScreen, page: () => CertificateScreen()),
 
     GetPage(name: AppRoutes.courseAddForm, page: () => CourseAddForm()),
     GetPage(name: AppRoutes.manageChapters, page: () => ManageChapters()),

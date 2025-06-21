@@ -5,8 +5,6 @@ import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/view/progress_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/state_manager.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/services.dart';
 import '../data/course_data.dart';
@@ -71,31 +69,36 @@ class CourseScreen extends StatelessWidget {
                     player,
                     AspectRatio(
                       aspectRatio: 16 / 9,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              cc.playPrevious();
-                            },
-                            icon: Icon(
-                              Icons.skip_previous,
-                              color: Colors.white,
-                              size: 50,
-                            ),
+                      child: Obx(
+                        () => Visibility(
+                          visible: cc.showCustomControls.value,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  cc.playPrevious();
+                                },
+                                icon: Icon(
+                                  Icons.skip_previous,
+                                  color: Colors.white,
+                                  size: 50,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  cc.playNext();
+                                },
+                                icon: Icon(
+                                  Icons.skip_next,
+                                  color: Colors.white,
+                                  size: 50,
+                                ),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            onPressed: () {
-                              cc.playNext();
-                            },
-                            icon: Icon(
-                              Icons.skip_next,
-                              color: Colors.white,
-                              size: 50,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
@@ -103,11 +106,11 @@ class CourseScreen extends StatelessWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Obx(() => Text("${cc.percentagePlayed.value}%")),
+                          // Obx(() => Text("${cc.percentagePlayed.value}%")),
                           Text(
                             "Material",
                             style: TextStyle(fontWeight: FontWeight.bold),

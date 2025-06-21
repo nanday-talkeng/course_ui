@@ -12,6 +12,29 @@ class ReviewController extends GetxController {
   final RxDouble starRating = 0.0.obs;
   final TextEditingController reviewText = TextEditingController();
 
+  final RxList reviewList = [].obs;
+  final RxBool isLoading = false.obs;
+
+  Future<void> getReviewList(String id) async {
+    isLoading.value = true;
+    reviewList.clear();
+    log("getReviewList called");
+    try {
+      await _firestore.collection("reviews").doc(id).get().then((snapshot) {
+        reviewList.value = snapshot.data()!.values.toList();
+        reviewList.sort(
+          (a, b) => (b['time'] as Timestamp).compareTo(a['time'] as Timestamp),
+        );
+
+        isLoading.value = false;
+        log("getReviewList success");
+      });
+    } catch (e) {
+      isLoading.value = false;
+      log("getReviewList exception: $e");
+    }
+  }
+
   Future<void> submitReview(
     CourseModel course,
     String type,
@@ -37,19 +60,29 @@ class ReviewController extends GetxController {
 
       newAverage = double.parse(newAverage.toStringAsFixed(1));
 
-      await _firestore
-          .collection("Courses")
-          .doc(course.id)
-          .collection("reviews")
-          .doc(userId)
-          .set({
-            "rating": newRating,
-            "review": reviewText.text.trim(),
-            "time": Timestamp.now(),
-            "uid": userData['uid'],
-            "name": userData['name'],
-            "image": userData['image'],
-          });
+      await _firestore.collection("reviews").doc(course.id).set({
+        userId: {
+          "rating": newRating,
+          "review": reviewText.text.trim(),
+          "time": Timestamp.now(),
+          "uid": userData['uid'],
+          "name": userData['name'],
+          "image": userData['image'],
+        },
+      }, SetOptions(merge: true));
+
+      reviewList.add({
+        "rating": newRating,
+        "review": reviewText.text.trim(),
+        "time": Timestamp.now(),
+        "uid": userData['uid'],
+        "name": userData['name'],
+        "image": userData['image'],
+      });
+
+      reviewList.sort(
+        (a, b) => (b['time'] as Timestamp).compareTo(a['time'] as Timestamp),
+      );
 
       reviewText.clear();
       starRating.value = 0.0;

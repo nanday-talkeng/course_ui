@@ -106,6 +106,17 @@ class WriteReviewBottomsheet extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
+                            // for (int i = 0; i < 100; i++) {
+                            //   userId = i.toString();
+                            //   rc.reviewText.text = i.toString();
+                            //   rc.starRating.value = 3.0;
+                            //   rc.submitReview(
+                            //     course,
+                            //     taskType,
+                            //     taskType == "Edit" ? oldReview : null,
+                            //   );
+                            //   log(i.toString());
+                            // }
                             rc.submitReview(
                               course,
                               taskType,

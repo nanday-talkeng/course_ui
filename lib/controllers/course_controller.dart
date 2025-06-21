@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:course_ui/routes/app_routes.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -21,6 +22,8 @@ class CourseController extends GetxController {
   final RxDouble secondsTotal = 0.0.obs;
   final RxInt percentagePlayed = 0.obs; // video played
 
+  RxBool showCustomControls = true.obs;
+
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -39,6 +42,8 @@ class CourseController extends GetxController {
     bool isVideoEndedHandled = false;
 
     ytController.addListener(() {
+      showCustomControls.value = ytController.value.isControlsVisible;
+
       if (ytController.value.playerState == PlayerState.playing) {
         isVideoEndedHandled = false;
 
@@ -76,11 +81,36 @@ class CourseController extends GetxController {
   }
 
   Future<void> playNext() async {
-    if (percentagePlayed.value > 80) {
-      //Must play 80% of the video
-      if (subProgress.value <
-          data[currentProgress.value]['contents'].length - 1) {
-        subProgress.value += 1;
+    if (currentProgress.value < currentCourse['current_stage']) {
+      nextVideo();
+    } else {
+      if (percentagePlayed.value > 80) {
+        nextVideo();
+      } else {
+        Fluttertoast.showToast(msg: "Must play atleast 80% of the video");
+      }
+    }
+  }
+
+  Future<void> nextVideo() async {
+    //Must play 80% of the video
+    if (subProgress.value <
+        data[currentProgress.value]['contents'].length - 1) {
+      subProgress.value += 1;
+
+      changeVideo(
+        data[currentProgress.value]['contents'][subProgress.value]['video'],
+        data[currentProgress.value]['contents'][subProgress.value]['duration'],
+      );
+
+      //Updating user progress
+      currentCourse['sub_stage'] = subProgress;
+      currentCourse['total_played'] += 1;
+      currentCourse.refresh();
+    } else {
+      if (currentProgress.value < data.length - 1) {
+        currentProgress.value += 1;
+        subProgress.value = 0;
 
         changeVideo(
           data[currentProgress.value]['contents'][subProgress.value]['video'],
@@ -89,72 +119,53 @@ class CourseController extends GetxController {
         );
 
         //Updating user progress
-        currentCourse['sub_stage'] = subProgress;
+        currentCourse['current_stage'] = currentProgress.value;
+        currentCourse['sub_stage'] = subProgress.value;
         currentCourse['total_played'] += 1;
         currentCourse.refresh();
+
+        try {
+          //Updating if user finished course
+          await _firestore //TODO
+              .collection("user_course_progress")
+              .doc(userId)
+              .set({
+                courseId.value: {
+                  "id": courseId.value,
+                  "current_stage": currentProgress.value,
+                  "sub_stage": subProgress.value,
+                  "finished": false,
+                },
+              }, SetOptions(merge: true))
+              .then((_) {
+                log("course progress updated");
+              });
+        } catch (e) {
+          log("Updating next video exception $e");
+        }
       } else {
-        if (currentProgress.value < data.length - 1) {
-          currentProgress.value += 1;
-          subProgress.value = 0;
-
-          changeVideo(
-            data[currentProgress.value]['contents'][subProgress.value]['video'],
-            data[currentProgress.value]['contents'][subProgress
-                .value]['duration'],
-          );
-
-          //Updating user progress
-          currentCourse['current_stage'] = currentProgress.value;
-          currentCourse['sub_stage'] = subProgress.value;
-          currentCourse['total_played'] += 1;
-          currentCourse.refresh();
-
-          try {
-            //Updating if user finished course
-            await _firestore //TODO
-                .collection("user_course_progress")
-                .doc(userId)
-                .set({
-                  courseId.value: {
-                    "id": courseId.value,
-                    "current_stage": currentProgress.value,
-                    "sub_stage": subProgress.value,
-                    "finished": false,
-                    "total_played": FieldValue.increment(1),
-                  },
-                }, SetOptions(merge: true))
-                .then((_) {
-                  log("course progress updated");
-                });
-          } catch (e) {
-            log("Updating next video exception $e");
-          }
-        } else {
-          log("All videos Finished");
-          try {
-            //Updating if user finished course
-            await _firestore //TODO
-                .collection("user_course_progress")
-                .doc(userId)
-                .set({
-                  courseId.value: {
-                    "id": courseId.value,
-                    "current_stage": currentProgress.value,
-                    "sub_stage": subProgress.value,
-                    "finished": true,
-                    "total_played": FieldValue.increment(1),
-                  },
-                }, SetOptions(merge: true))
-                .then((_) {
-                  log("course finish updated");
-                });
-          } catch (e) {
-            log("Setting course complete exception: $e");
-          }
+        log("All videos Finished");
+        Get.toNamed(AppRoutes.certificateScreen);
+        try {
+          //Updating if user finished course
+          await _firestore //TODO
+              .collection("user_course_progress")
+              .doc(userId)
+              .set({
+                courseId.value: {
+                  "id": courseId.value,
+                  "current_stage": currentProgress.value,
+                  "sub_stage": subProgress.value,
+                  "finished": true,
+                },
+              }, SetOptions(merge: true))
+              .then((_) {
+                log("course finish updated");
+              });
+        } catch (e) {
+          log("Setting course complete exception: $e");
         }
       }
-    } else {
-      Fluttertoast.showToast(msg: "Must play atleast 80% of the video");
     }
   }
 

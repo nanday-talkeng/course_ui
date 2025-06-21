@@ -21,125 +21,125 @@ class ManageChapters extends StatelessWidget {
         title: Text("Manage Chapters/Videos"),
         backgroundColor: Colors.white,
       ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Obx(
-                () => cac.chapters.isEmpty
-                    ? Center(child: Text("No Chapters added"))
-                    : Scrollbar(
-                        radius: Radius.circular(16),
-                        child: ListView.builder(
-                          itemCount: cac.chapters.length,
-                          itemBuilder: (context, index) {
-                            final Map chapter = cac.chapters[index];
-                            return Card(
-                              color: Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 8,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "Chapter ${index + 1}",
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(
+              () => cac.chapters.isEmpty
+                  ? Center(child: Text("No Chapters added"))
+                  : Scrollbar(
+                      radius: Radius.circular(16),
+                      child: ListView.builder(
+                        itemCount: cac.chapters.length,
+                        padding: EdgeInsets.all(12),
+                        itemBuilder: (context, index) {
+                          final Map chapter = cac.chapters[index];
+                          return Card(
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 8,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Chapter ${index + 1}",
+                                              style: TextStyle(
+                                                color: Colors.grey,
                                               ),
-                                              Text(
-                                                chapter['title'],
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                            ),
+                                            Text(
+                                              chapter['title'],
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                        TextButton.icon(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) =>
-                                                  addVideo(context, index),
-                                            );
-                                          },
-                                          icon: Icon(Icons.add),
-                                          label: Text("Add Video"),
+                                      ),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                addVideo(context, index),
+                                          );
+                                        },
+                                        icon: Icon(Icons.add),
+                                        label: Text("Add Video"),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          cac.chapters.removeAt(index);
+                                        },
+                                        icon: Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red,
                                         ),
-                                        IconButton(
+                                      ),
+                                    ],
+                                  ),
+                                  Divider(color: Colors.grey.withAlpha(100)),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: chapter['contents'].length,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      final Map video =
+                                          chapter['contents'][index];
+                                      return ListTile(
+                                        dense: true,
+                                        leading: Icon(
+                                          Icons.play_circle_rounded,
+                                          color: primaryColor,
+                                        ),
+                                        title: Text(video['title']),
+                                        subtitle: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(video['video']),
+                                            Text(
+                                              video['duration']
+                                                  .toString()
+                                                  .replaceAll(".", ":"),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
                                           onPressed: () {
-                                            cac.chapters.removeAt(index);
+                                            //cac.chapters[].removeAt(index);
                                           },
                                           icon: Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
+                                            Icons.close_rounded,
+                                            color: Colors.grey,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                    Divider(color: Colors.grey.withAlpha(100)),
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: chapter['contents'].length,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemBuilder: (context, index) {
-                                        final Map video =
-                                            chapter['contents'][index];
-                                        return ListTile(
-                                          dense: true,
-                                          leading: Icon(
-                                            Icons.play_circle_rounded,
-                                            color: primaryColor,
-                                          ),
-                                          title: Text(video['title']),
-                                          subtitle: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(video['video']),
-                                              Text(
-                                                video['duration']
-                                                    .toString()
-                                                    .replaceAll(".", ":"),
-                                              ),
-                                            ],
-                                          ),
-                                          trailing: IconButton(
-                                            onPressed: () {
-                                              //cac.chapters[].removeAt(index);
-                                            },
-                                            icon: Icon(
-                                              Icons.close_rounded,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-              ),
+                    ),
             ),
-            Row(
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Row(
               children: [
                 Expanded(
                   child: SizedBox(
@@ -187,8 +187,8 @@ class ManageChapters extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
