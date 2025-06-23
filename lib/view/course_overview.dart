@@ -4,6 +4,7 @@ import 'package:course_ui/routes/app_routes.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/instance_manager.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -85,7 +86,15 @@ class CourseOverview extends StatelessWidget {
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) {
                                 final String item = courseData.tags[index];
-                                return tagText(item, Colors.blue);
+                                return tagText(
+                                  item,
+                                  [
+                                    Colors.blue.shade600,
+                                    Colors.red.shade600,
+                                    Colors.green.shade600,
+                                    Colors.amber.shade600,
+                                  ][index % 4],
+                                );
                               },
                             ),
                           ),
@@ -264,18 +273,25 @@ class CourseOverview extends StatelessWidget {
                               const SizedBox(height: 24),
                               TextButton.icon(
                                 onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (context) {
-                                      rc.reviewText.text = "";
-                                      rc.starRating.value = 0;
-                                      return WriteReviewBottomsheet(
-                                        course: courseData,
-                                        taskType: "New",
-                                      );
-                                    },
-                                  );
+                                  if (currentCourse['finished']) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (context) {
+                                        rc.reviewText.text = "";
+                                        rc.starRating.value = 0;
+                                        return WriteReviewBottomsheet(
+                                          course: courseData,
+                                          taskType: "New",
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg:
+                                          "Complete course to share your experience",
+                                    );
+                                  }
                                 },
                                 icon: Icon(Icons.edit),
                                 label: Text("Write review"),
@@ -287,39 +303,53 @@ class CourseOverview extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey.withAlpha(85)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Course Certificate",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "Issued by Agatsya Edutech Private Limited",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600,
+                    InkWell(
+                      onTap: () {
+                        if (currentCourse['finished']) {
+                          Get.toNamed(
+                            AppRoutes.certificateScreen,
+                            arguments: courseData,
+                          );
+                        } else {
+                          Fluttertoast.showToast(
+                            msg: "Complete course to get Certificaate",
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey.withAlpha(85)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Course Certificate",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Image.asset(
-                            "images/quality.png",
-                            height: 50,
-                            width: 50,
-                          ),
-                        ],
+                                Text(
+                                  "Issued by Agatsya Edutech Private Limited",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Image.asset(
+                              "images/quality.png",
+                              height: 50,
+                              width: 50,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),

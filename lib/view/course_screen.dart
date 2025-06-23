@@ -25,6 +25,8 @@ class CourseScreen extends StatelessWidget {
         log("Error enabling screen security: $e");
       }
 
+      cc.course.value = course;
+
       cc.currentProgress.value = currentCourse['current_stage'];
       cc.subProgress.value = currentCourse['sub_stage'];
 

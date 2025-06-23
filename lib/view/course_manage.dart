@@ -29,6 +29,8 @@ class CourseManage extends StatelessWidget {
       body: FirestoreListView(
         query: FirebaseFirestore.instance.collection("Courses"),
         padding: EdgeInsets.symmetric(vertical: 6),
+        errorBuilder: (context, error, stackTrace) =>
+            Center(child: Text("Something went wrong!")),
         itemBuilder: (context, doc) {
           final CourseModel course = CourseModel.fromJson(doc.data());
           return Card(

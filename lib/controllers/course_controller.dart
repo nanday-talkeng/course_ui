@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/routes/app_routes.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -19,10 +20,24 @@ class CourseController extends GetxController {
   late YoutubePlayerController ytController;
 
   final RxInt seconds = 0.obs; // video played
-  final RxDouble secondsTotal = 0.0.obs;
-  final RxInt percentagePlayed = 0.obs; // video played
+  final RxDouble secondsTotal = 1.0.obs;
+  final RxInt percentagePlayed = 1.obs; // video played
 
   RxBool showCustomControls = true.obs;
+
+  final Rx<CourseModel> course = CourseModel(
+    rating: 0,
+    ratingCount: 0,
+    data: data,
+    courseBy: '',
+    id: '',
+    image: '',
+    title: '',
+    description: '',
+    features: [],
+    tags: [],
+    type: '',
+  ).obs;
 
   @override
   Future<void> onInit() async {
@@ -119,7 +134,10 @@ class CourseController extends GetxController {
         );
 
         //Updating user progress
-        currentCourse['current_stage'] = currentProgress.value;
+        if (currentCourse['current_stage'] < currentProgress.value) {
+          currentCourse['current_stage'] = currentProgress.value;
+        }
+
         currentCourse['sub_stage'] = subProgress.value;
         currentCourse['total_played'] += 1;
         currentCourse.refresh();
@@ -145,7 +163,7 @@ class CourseController extends GetxController {
         }
       } else {
         log("All videos Finished");
-        Get.toNamed(AppRoutes.certificateScreen);
+        Get.toNamed(AppRoutes.certificateScreen, arguments: course.value);
         try {
           //Updating if user finished course
           await _firestore //TODO
@@ -157,6 +175,7 @@ class CourseController extends GetxController {
                   "current_stage": currentProgress.value,
                   "sub_stage": subProgress.value,
                   "finished": true,
+                  "finished_time": Timestamp.now(),
                 },
               }, SetOptions(merge: true))
               .then((_) {

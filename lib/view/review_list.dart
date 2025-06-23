@@ -7,6 +7,7 @@ import 'package:course_ui/models/review_model.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -136,19 +137,25 @@ class ReviewList extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) {
-                      rc.reviewText.text = "";
-                      rc.starRating.value = 0;
-                      return WriteReviewBottomsheet(
-                        course: course,
-                        taskType: "New",
-                      );
-                    },
-                  );
+                  if (currentCourse['finished']) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) {
+                        rc.reviewText.text = "";
+                        rc.starRating.value = 0;
+                        return WriteReviewBottomsheet(
+                          course: course,
+                          taskType: "New",
+                        );
+                      },
+                    );
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: "Complete course to share your experience",
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,

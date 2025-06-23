@@ -1,4 +1,5 @@
 import 'package:course_ui/controllers/course_controller.dart';
+import 'package:course_ui/data/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -27,17 +28,17 @@ class ProgressTile extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          initiallyExpanded: cc.currentProgress.value == index,
+          initiallyExpanded: currentCourse['current_stage'] == index,
           backgroundColor: Colors.grey.withAlpha(25),
           leading: Obx(
-            () => cc.currentProgress.value > index
+            () => currentCourse['current_stage'] > index
                 ? CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.teal,
 
                     child: Icon(Icons.check_rounded, color: Colors.white),
                   )
-                : cc.currentProgress.value != index
+                : currentCourse['current_stage'] != index
                 ? CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.teal,
