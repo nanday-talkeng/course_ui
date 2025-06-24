@@ -16,7 +16,7 @@ class ProgressTile extends StatelessWidget {
   final int index;
   final int length;
 
-  final CourseController cc = Get.put(CourseController());
+  final CourseController cc = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,14 @@ class ProgressTile extends StatelessWidget {
           initiallyExpanded: currentCourse['current_stage'] == index,
           backgroundColor: Colors.grey.withAlpha(25),
           leading: Obx(
-            () => currentCourse['current_stage'] > index
+            () => currentCourse['finished']
+                ? CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.teal,
+
+                    child: Icon(Icons.check_rounded, color: Colors.white),
+                  )
+                : currentCourse['current_stage'] > index
                 ? CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.teal,

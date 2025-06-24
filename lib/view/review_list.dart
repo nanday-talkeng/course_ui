@@ -7,7 +7,6 @@ import 'package:course_ui/models/review_model.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -22,7 +21,7 @@ class ReviewList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.delayed(Duration.zero).then((_) {
-      rc.getReviewList(course.id);
+      rc.getReviewList(course.reviewCollection);
     });
     return Scaffold(
       appBar: AppBar(
@@ -138,22 +137,14 @@ class ReviewList extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   if (currentCourse['finished']) {
-                    showModalBottomSheet(
-                      context: context,
+                    Get.bottomSheet(
+                      WriteReviewBottomsheet(course: course, taskType: "New"),
                       isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) {
-                        rc.reviewText.text = "";
-                        rc.starRating.value = 0;
-                        return WriteReviewBottomsheet(
-                          course: course,
-                          taskType: "New",
-                        );
-                      },
                     );
                   } else {
-                    Fluttertoast.showToast(
-                      msg: "Complete course to share your experience",
+                    Get.snackbar(
+                      "Write Review",
+                      "Complete course to share your experience",
                     );
                   }
                 },
@@ -247,19 +238,13 @@ class ReviewList extends StatelessWidget {
               visible: review.uid == userId,
               child: InkWell(
                 onTap: () {
-                  showModalBottomSheet(
-                    context: context,
+                  Get.bottomSheet(
+                    WriteReviewBottomsheet(
+                      course: course,
+                      taskType: "Edit",
+                      oldReview: review.rating,
+                    ),
                     isScrollControlled: true,
-                    enableDrag: true,
-                    builder: (context) {
-                      rc.reviewText.text = review.review;
-                      rc.starRating.value = review.rating;
-                      return WriteReviewBottomsheet(
-                        course: course,
-                        taskType: "Edit",
-                        oldReview: review.rating,
-                      );
-                    },
                   );
                 },
                 child: Padding(

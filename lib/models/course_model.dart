@@ -4,12 +4,15 @@ class CourseModel {
   final List data;
   final String courseBy;
   final String id;
+  final String reviewCollection;
   final String image;
   final String title;
   final String description;
   final List<FeatureModel> features;
   final List<String> tags;
   final String type;
+  final bool isFree;
+  final int amount;
 
   CourseModel({
     required this.rating,
@@ -17,12 +20,15 @@ class CourseModel {
     required this.data,
     required this.courseBy,
     required this.id,
+    required this.reviewCollection,
     required this.image,
     required this.title,
     required this.description,
     required this.features,
     required this.tags,
     required this.type,
+    required this.isFree,
+    required this.amount,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +38,7 @@ class CourseModel {
       data: json['data'],
       courseBy: json['course_by'],
       id: json['id'],
+      reviewCollection: json['review_collection'],
       image: json['image'],
       title: json['title'],
       description: json['description'],
@@ -40,6 +47,8 @@ class CourseModel {
           .toList(),
       tags: List<String>.from(json['tags']),
       type: json['type'],
+      isFree: json['isFree'],
+      amount: json['amount'],
     );
   }
 }

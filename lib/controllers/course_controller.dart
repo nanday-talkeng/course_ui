@@ -31,12 +31,15 @@ class CourseController extends GetxController {
     data: data,
     courseBy: '',
     id: '',
+    reviewCollection: '',
     image: '',
     title: '',
     description: '',
     features: [],
     tags: [],
     type: '',
+    isFree: true,
+    amount: 0,
   ).obs;
 
   @override
@@ -79,6 +82,16 @@ class CourseController extends GetxController {
     });
   }
 
+  Future<void> addtoMyCourses(String id) async {
+    try {
+      await _firestore.collection("Users").doc(userId).set({
+        "courses": FieldValue.arrayUnion([id]),
+      });
+    } catch (e) {
+      log("addtoMyCourses exception: $e");
+    }
+  }
+
   void changeVideo(String id, double duration) {
     log("Changing video");
     currentVideo.value = id;
@@ -96,19 +109,24 @@ class CourseController extends GetxController {
   }
 
   Future<void> playNext() async {
-    if (currentProgress.value < currentCourse['current_stage']) {
-      nextVideo();
+    final bool isCourseFinished = currentCourse['finished'] == true;
+    final int maxStage = currentCourse['current_stage'] ?? 0;
+    final bool hasWatchedEnough = percentagePlayed.value >= 80;
+
+    if (currentProgress.value < maxStage) {
+      nextVideo(); // Unlocking earlier stage videos (rewatch logic)
     } else {
-      if (percentagePlayed.value > 80) {
+      if (isCourseFinished || hasWatchedEnough) {
         nextVideo();
       } else {
-        Fluttertoast.showToast(msg: "Must play atleast 80% of the video");
+        Fluttertoast.showToast(
+          msg: "Must play at least 80% of the video to continue",
+        );
       }
     }
   }
 
   Future<void> nextVideo() async {
-    //Must play 80% of the video
     if (subProgress.value <
         data[currentProgress.value]['contents'].length - 1) {
       subProgress.value += 1;

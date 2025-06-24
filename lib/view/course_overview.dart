@@ -1,4 +1,5 @@
-import 'package:course_ui/controllers/review_controller.dart';
+import 'package:course_ui/controllers/payment_gateway_controller.dart';
+import 'package:course_ui/data/course_data.dart';
 import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/routes/app_routes.dart';
 import 'package:course_ui/view/write_review_bottomsheet.dart';
@@ -15,8 +16,6 @@ class CourseOverview extends StatelessWidget {
   CourseOverview({super.key});
 
   final CourseModel courseData = Get.arguments;
-
-  final ReviewController rc = Get.put(ReviewController());
 
   @override
   Widget build(BuildContext context) {
@@ -117,96 +116,7 @@ class CourseOverview extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey.withAlpha(85)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Your Study Progress",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 12),
-
-                          SizedBox(
-                            height: 50,
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              itemCount: courseData.data.length,
-                              scrollDirection: Axis.horizontal,
-                              separatorBuilder: (context, index) => Center(
-                                child: Container(
-                                  color: Colors.teal.withAlpha(100),
-                                  width: 16,
-                                  height: 4,
-                                ),
-                              ),
-                              itemBuilder: (context, index) {
-                                return currentCourse['current_stage'] > index
-                                    ? CircleAvatar(
-                                        radius: 20,
-                                        backgroundColor: Colors.teal,
-
-                                        child: Icon(
-                                          Icons.check_rounded,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : currentCourse['current_stage'] != index
-                                    ? CircleAvatar(
-                                        radius: 20,
-                                        backgroundColor: Colors.grey,
-
-                                        child: Icon(
-                                          Icons.hourglass_bottom,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : CircularPercentIndicator(
-                                        radius: 20.0,
-                                        lineWidth: 5.0,
-                                        percent:
-                                            (index *
-                                                (100 /
-                                                    (courseData.data.length -
-                                                        1))) /
-                                            100,
-                                        center: Text(
-                                          "${(index * (100 / (courseData.data.length - 1))).toStringAsFixed(0)}%",
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-
-                                        progressColor: Colors.deepOrangeAccent,
-                                      );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withAlpha(20),
-                              border: Border.all(
-                                color: Colors.green.withAlpha(85),
-                              ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              "Great Job 🎉 You're on the path to becoming a certified ${courseData.title}. Your dedication to learning is impressive Finish Strong!",
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _studyProgressSection(),
                     const SizedBox(height: 16),
                     Container(
                       width: double.infinity,
@@ -274,22 +184,17 @@ class CourseOverview extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () {
                                   if (currentCourse['finished']) {
-                                    showModalBottomSheet(
-                                      context: context,
+                                    Get.bottomSheet(
+                                      WriteReviewBottomsheet(
+                                        course: courseData,
+                                        taskType: "New",
+                                      ),
                                       isScrollControlled: true,
-                                      builder: (context) {
-                                        rc.reviewText.text = "";
-                                        rc.starRating.value = 0;
-                                        return WriteReviewBottomsheet(
-                                          course: courseData,
-                                          taskType: "New",
-                                        );
-                                      },
                                     );
                                   } else {
-                                    Fluttertoast.showToast(
-                                      msg:
-                                          "Complete course to share your experience",
+                                    Get.snackbar(
+                                      "Write Review",
+                                      "Complete course to share your experience",
                                     );
                                   }
                                 },
@@ -357,19 +262,69 @@ class CourseOverview extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
-              height: 50,
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(AppRoutes.courseScreen, arguments: courseData);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+            Row(
+              children: [
+                Visibility(
+                  visible:
+                      !courseData.isFree &&
+                      !(userData.value.courses.contains(courseData.id)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 32, left: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Buy for", style: TextStyle(fontSize: 12)),
+                        Text(
+                          "₹${courseData.amount.toDouble()}",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Text("START LEARNING"),
-              ),
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (courseData.isFree) {
+                          Get.toNamed(
+                            AppRoutes.courseScreen,
+                            arguments: courseData,
+                          );
+                        } else {
+                          if (userData.value.courses.contains(courseId)) {
+                            Get.toNamed(
+                              AppRoutes.courseScreen,
+                              arguments: courseData,
+                            );
+                          } else {
+                            final PaymentController pc = Get.put(
+                              PaymentController(),
+                            );
+
+                            pc.openCheckout(
+                              name: userData.value.name,
+                              contact: '',
+                              email: userData.value.email,
+                              amountInPaise: courseData.amount * 100,
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text("START LEARNING"),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -418,5 +373,97 @@ class CourseOverview extends StatelessWidget {
 
   IconData getIconData(String iconName) {
     return iconMap[iconName] ?? Icons.help_outline;
+  }
+
+  Widget _studyProgressSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.withAlpha(85)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Your Study Progress",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+
+          SizedBox(
+            height: 50,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: courseData.data.length,
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (context, index) => Center(
+                child: Container(
+                  color: Colors.teal.withAlpha(100),
+                  width: 16,
+                  height: 4,
+                ),
+              ),
+              itemBuilder: (context, index) {
+                return currentCourse['finished']
+                    ? CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.teal,
+
+                        child: Icon(Icons.check_rounded, color: Colors.white),
+                      )
+                    : currentCourse['current_stage'] > index
+                    ? CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.teal,
+
+                        child: Icon(Icons.check_rounded, color: Colors.white),
+                      )
+                    : currentCourse['current_stage'] != index
+                    ? CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.grey,
+
+                        child: Icon(
+                          Icons.hourglass_bottom,
+                          color: Colors.white,
+                        ),
+                      )
+                    : CircularPercentIndicator(
+                        radius: 20.0,
+                        lineWidth: 5.0,
+                        percent:
+                            (index * (100 / (courseData.data.length - 1))) /
+                            100,
+                        center: Text(
+                          "${(index * (100 / (courseData.data.length - 1))).toStringAsFixed(0)}%",
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        progressColor: Colors.deepOrangeAccent,
+                      );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.green.withAlpha(20),
+              border: Border.all(color: Colors.green.withAlpha(85)),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              "Great Job 🎉 You're on the path to becoming a certified ${courseData.title}. Your dedication to learning is impressive Finish Strong!",
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

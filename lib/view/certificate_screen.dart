@@ -55,7 +55,7 @@ class CertificateScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
                 Text(
-                  userData['name'] ?? "",
+                  userData.value.name,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                 ),
                 Spacer(),

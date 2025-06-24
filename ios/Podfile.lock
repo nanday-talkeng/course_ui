@@ -1372,6 +1372,10 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - razorpay-pod (1.4.2)
+  - razorpay_flutter (1.1.10):
+    - Flutter
+    - razorpay-pod
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
@@ -1384,6 +1388,7 @@ DEPENDENCIES:
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - razorpay_flutter (from `.symlinks/plugins/razorpay_flutter/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
 
 SPEC REPOS:
@@ -1405,6 +1410,7 @@ SPEC REPOS:
     - leveldb-library
     - nanopb
     - OrderedSet
+    - razorpay-pod
 
 EXTERNAL SOURCES:
   cloud_firestore:
@@ -1421,6 +1427,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  razorpay_flutter:
+    :path: ".symlinks/plugins/razorpay_flutter/ios"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
 
@@ -1449,6 +1457,8 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  razorpay-pod: 77bdd9733b6ea81c9fbbd6b75fea6a09feab284e
+  razorpay_flutter: 0e98e4fcaae27ad50e011d85f66d85e0a008754a
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
 PODFILE CHECKSUM: 251cb053df7158f337c0712f2ab29f4e0fa474ce

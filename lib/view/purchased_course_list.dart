@@ -1,13 +1,14 @@
 import 'package:course_ui/controllers/list_controller.dart';
+import 'package:course_ui/data/user_data.dart';
 import 'package:course_ui/view/widgets/course_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/course_model.dart';
 
-class CourseList extends StatelessWidget {
-  CourseList({super.key});
+class PurchasedCourseList extends StatelessWidget {
+  PurchasedCourseList({super.key});
 
-  final ListController lc = Get.put(ListController());
+  final ListController lc = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,9 @@ class CourseList extends StatelessWidget {
                     lc.courseList[index],
                   );
 
-                  return CourseCard(item: item);
+                  return userData.value.courses.contains(item.id)
+                      ? CourseCard(item: item)
+                      : SizedBox.shrink();
                 },
               ),
       ),

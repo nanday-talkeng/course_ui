@@ -13,7 +13,7 @@ class CourseScreen extends StatelessWidget {
   CourseScreen({super.key});
 
   final CourseModel course = Get.arguments;
-  final CourseController cc = Get.put(CourseController());
+  final CourseController cc = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +34,10 @@ class CourseScreen extends StatelessWidget {
         data[currentCourse['current_stage']]['contents'][currentCourse['sub_stage']]['video'],
         data[currentCourse['current_stage']]['contents'][currentCourse['sub_stage']]['duration'],
       );
+
+      if (!userData.value.courses.contains(currentCourse['id'])) {
+        cc.addtoMyCourses(currentCourse['id']);
+      }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {});
     return PopScope(

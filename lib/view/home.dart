@@ -1,7 +1,8 @@
 import 'package:course_ui/const/colors.dart';
 import 'package:course_ui/controllers/list_controller.dart';
-import 'package:course_ui/view/course_manage.dart';
+import 'package:course_ui/view/admin/course_manage.dart';
 import 'package:course_ui/view/course_list.dart';
+import 'package:course_ui/view/purchased_course_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,7 +11,7 @@ class MyHomePage extends StatelessWidget {
 
   final ListController lc = Get.put(ListController());
 
-  final List tabs = [CourseList(), CourseManage()];
+  final List tabs = [CourseList(), PurchasedCourseList(), CourseManage()];
   final RxInt selectedIndex = 0.obs;
 
   @override
@@ -35,6 +36,11 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.book_outlined),
               activeIcon: Icon(Icons.book_rounded),
               label: "Courses",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book_outlined),
+              activeIcon: Icon(Icons.book_rounded),
+              label: "My Courses",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings_outlined),

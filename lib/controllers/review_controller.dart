@@ -65,9 +65,9 @@ class ReviewController extends GetxController {
           "rating": newRating,
           "review": reviewText.text.trim(),
           "time": Timestamp.now(),
-          "uid": userData['uid'],
-          "name": userData['name'],
-          "image": userData['image'],
+          "uid": userData.value.uid,
+          "name": userData.value.name,
+          "image": userData.value.image,
         },
       }, SetOptions(merge: true));
 
@@ -75,9 +75,9 @@ class ReviewController extends GetxController {
         "rating": newRating,
         "review": reviewText.text.trim(),
         "time": Timestamp.now(),
-        "uid": userData['uid'],
-        "name": userData['name'],
-        "image": userData['image'],
+        "uid": userData.value.uid,
+        "name": userData.value.name,
+        "image": userData.value.image,
       });
 
       reviewList.sort(

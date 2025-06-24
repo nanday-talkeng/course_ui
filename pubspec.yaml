@@ -45,6 +45,8 @@ dependencies:
   firebase_database: ^11.3.6
   firebase_ui_firestore: ^1.7.1
   flutter_rating: ^2.0.2
+  get_storage: ^2.1.1
+  razorpay_flutter: ^1.4.0
 
 dev_dependencies:
   flutter_test:

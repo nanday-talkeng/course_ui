@@ -1,11 +1,13 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:course_ui/data/user_data.dart';
+import 'package:course_ui/models/user_model.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ListController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final box = GetStorage();
 
   @override
   void onInit() {
@@ -18,11 +20,32 @@ class ListController extends GetxController {
   final RxList courseList = [].obs;
 
   Future<void> getCourseList() async {
+    const cacheKey = 'cached_course_list';
+    const expiryKey = 'cached_course_list_expiry';
+
+    final int? expiryTimestamp = box.read(expiryKey);
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // If data exists and not expired, use cache
+    if (expiryTimestamp != null && now < expiryTimestamp) {
+      final List<dynamic>? cachedData = box.read(cacheKey);
+      if (cachedData != null) {
+        courseList.assignAll(List<Map<String, dynamic>>.from(cachedData));
+
+        log("Loaded course list from cache");
+        return;
+      }
+    }
+
     try {
       await _firestore.collection("Courses").get().then((snapshot) {
-        for (var s in snapshot.docs) {
-          courseList.add(s.data());
-        }
+        courseList.assignAll(snapshot.docs.map((s) => s.data()).toList());
+
+        // Update cache
+        box.write(cacheKey, courseList.toList());
+        box.write(expiryKey, now + const Duration(minutes: 60).inMilliseconds);
+
+        log("Loaded course list from Firestore and cached");
       });
     } catch (e) {
       log("getCourseList exception: $e");
@@ -32,7 +55,7 @@ class ListController extends GetxController {
   Future<void> getUserData() async {
     try {
       await _firestore.collection("Users").doc(userId).get().then((snapshot) {
-        userData.value = snapshot.data()!;
+        userData.value = UserModel.fromJson(snapshot.data()!);
       });
     } catch (e) {
       log("getUserData exception: $e");
