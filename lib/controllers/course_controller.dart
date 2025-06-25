@@ -59,6 +59,10 @@ class CourseController extends GetxController {
 
     bool isVideoEndedHandled = false;
 
+    if (!userData.value.courses.contains(currentCourse['id'])) {
+      addtoMyCourses(currentCourse['id']);
+    }
+
     ytController.addListener(() {
       showCustomControls.value = ytController.value.isControlsVisible;
 
@@ -84,9 +88,21 @@ class CourseController extends GetxController {
 
   Future<void> addtoMyCourses(String id) async {
     try {
-      await _firestore.collection("Users").doc(userId).set({
+      WriteBatch _batch = _firestore.batch();
+
+      _batch.set(_firestore.collection("Users").doc(userId), {
         "courses": FieldValue.arrayUnion([id]),
-      });
+      }, SetOptions(merge: true));
+
+      _batch.set(
+        _firestore.collection("user_course_progress").doc(userId),
+        {
+          id: {"current_stage": 0, "finished": false, "sub_stage": 0},
+        },
+        SetOptions(merge: true),
+      );
+
+      await _batch.commit();
     } catch (e) {
       log("addtoMyCourses exception: $e");
     }
@@ -162,7 +178,7 @@ class CourseController extends GetxController {
 
         try {
           //Updating if user finished course
-          await _firestore //TODO
+          await _firestore
               .collection("user_course_progress")
               .doc(userId)
               .set({
@@ -184,7 +200,7 @@ class CourseController extends GetxController {
         Get.toNamed(AppRoutes.certificateScreen, arguments: course.value);
         try {
           //Updating if user finished course
-          await _firestore //TODO
+          await _firestore
               .collection("user_course_progress")
               .doc(userId)
               .set({

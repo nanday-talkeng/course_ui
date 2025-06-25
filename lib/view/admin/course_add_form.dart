@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:course_ui/const/colors.dart';
 import 'package:course_ui/controllers/course_add_controller.dart';
+import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -182,26 +183,84 @@ class CourseAddForm extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text("Features"),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: cac.features.length,
-                  padding: EdgeInsets.all(0),
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    var feature = cac.features[index];
-                    return ListTile(
-                      dense: true,
-                      title: Text(feature.title),
-                      subtitle: Text(feature.sub),
-                      trailing: IconButton(
-                        onPressed: () {
-                          cac.features.removeAt(index);
-                          cac.features.refresh();
-                        },
-                        icon: Icon(Icons.close),
+                Obx(
+                  () => ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: cac.features.length,
+                    padding: EdgeInsets.all(0),
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      var feature = cac.features[index];
+                      return ListTile(
+                        dense: true,
+                        title: Text(feature.title),
+                        subtitle: Text(feature.sub),
+                        trailing: IconButton(
+                          onPressed: () {
+                            cac.features.removeAt(index);
+                          },
+                          icon: Icon(Icons.close),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: cac.featureTitle,
+                        decoration: InputDecoration(
+                          hintText: "Title",
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 8,
+                          ),
+                        ),
                       ),
-                    );
-                  },
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: cac.featureSubtitle,
+                        decoration: InputDecoration(
+                          hintText: "Subtitle",
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 8,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      height: 45,
+                      width: 100,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if ((cac.featureTitle.text != "") &&
+                              (cac.featureSubtitle.text != "")) {
+                            cac.features.add(
+                              FeatureModel.fromJson({
+                                "title": cac.featureTitle.text,
+                                "sub": cac.featureSubtitle.text,
+                                "icon": "type",
+                              }),
+                            );
+                            cac.featureTitle.clear();
+                            cac.featureSubtitle.clear();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text("Add"),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 SizedBox(

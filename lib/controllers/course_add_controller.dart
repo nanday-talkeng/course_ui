@@ -14,6 +14,9 @@ class CourseAddController extends GetxController {
   final TextEditingController courseByController = TextEditingController();
   final TextEditingController tagAdd = TextEditingController();
 
+  final TextEditingController featureTitle = TextEditingController();
+  final TextEditingController featureSubtitle = TextEditingController();
+
   final TextEditingController chapterTitleController = TextEditingController();
 
   final TextEditingController videoTitleController = TextEditingController();

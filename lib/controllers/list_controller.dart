@@ -56,6 +56,7 @@ class ListController extends GetxController {
     try {
       await _firestore.collection("Users").doc(userId).get().then((snapshot) {
         userData.value = UserModel.fromJson(snapshot.data()!);
+        log(userData.value.courses.toString());
       });
     } catch (e) {
       log("getUserData exception: $e");

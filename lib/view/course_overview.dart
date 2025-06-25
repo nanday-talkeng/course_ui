@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:course_ui/controllers/payment_gateway_controller.dart';
 import 'package:course_ui/data/course_data.dart';
 import 'package:course_ui/models/course_model.dart';
@@ -292,12 +294,13 @@ class CourseOverview extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         if (courseData.isFree) {
+                          log("here 1");
                           Get.toNamed(
                             AppRoutes.courseScreen,
                             arguments: courseData,
                           );
                         } else {
-                          if (userData.value.courses.contains(courseId)) {
+                          if (userData.value.courses.contains(courseId.value)) {
                             Get.toNamed(
                               AppRoutes.courseScreen,
                               arguments: courseData,

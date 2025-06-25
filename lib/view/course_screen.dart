@@ -34,12 +34,8 @@ class CourseScreen extends StatelessWidget {
         data[currentCourse['current_stage']]['contents'][currentCourse['sub_stage']]['video'],
         data[currentCourse['current_stage']]['contents'][currentCourse['sub_stage']]['duration'],
       );
-
-      if (!userData.value.courses.contains(currentCourse['id'])) {
-        cc.addtoMyCourses(currentCourse['id']);
-      }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) async {});
+
     return PopScope(
       onPopInvokedWithResult: (didPop, result) async {
         const platform = MethodChannel('com.example.course_ui/screen_security');
@@ -57,7 +53,7 @@ class CourseScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
-              title: Text("Course Name"),
+              title: Text(cc.course.value.title),
               actions: [
                 IconButton(
                   onPressed: () {
