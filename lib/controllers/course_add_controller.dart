@@ -10,9 +10,14 @@ class CourseAddController extends GetxController {
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController typeController = TextEditingController();
+  final TextEditingController hoursController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController courseByController = TextEditingController();
   final TextEditingController tagAdd = TextEditingController();
+
+  final TextEditingController originalAmountController =
+      TextEditingController();
+  final TextEditingController amountController = TextEditingController();
 
   final TextEditingController featureTitle = TextEditingController();
   final TextEditingController featureSubtitle = TextEditingController();
@@ -28,6 +33,9 @@ class CourseAddController extends GetxController {
   final RxList<FeatureModel> features = <FeatureModel>[].obs;
 
   final RxList chapters = [].obs;
+
+  final RxString isFree = "Yes".obs;
+  final items = ['Yes', 'No'];
 
   Future<void> addCourse() async {
     final String id = Timestamp.now().millisecondsSinceEpoch.toString();
@@ -48,6 +56,14 @@ class CourseAddController extends GetxController {
             "rating": 5,
             "rating_count": 0,
             "data": chapters,
+            "hours": int.parse(hoursController.text),
+            "isFree": isFree.value == "Yes" ? true : "No",
+            "original_amount": isFree.value == "Yes"
+                ? 0
+                : int.parse(originalAmountController.text),
+            "amount": isFree.value == "Yes"
+                ? 0
+                : int.parse(amountController.text),
           }, SetOptions(merge: true))
           .then((_) {
             clearTextFields();
@@ -72,6 +88,14 @@ class CourseAddController extends GetxController {
             "tags": tags,
             "image": imageUrl.value,
             "data": chapters,
+            "hours": int.parse(hoursController.text),
+            "isFree": isFree.value == "Yes" ? true : "No",
+            "original_amount": isFree.value == "Yes"
+                ? 0
+                : int.parse(originalAmountController.text),
+            "amount": isFree.value == "Yes"
+                ? 0
+                : int.parse(amountController.text),
           }, SetOptions(merge: true))
           .then((_) {
             clearTextFields();
@@ -99,6 +123,12 @@ class CourseAddController extends GetxController {
     tags.value = course.tags;
     features.assignAll(course.features);
 
+    hoursController.text = (course.hours ?? 0).toString();
+
+    isFree.value = course.isFree ? "Yes" : "No";
+    originalAmountController.text = (course.originalAmount ?? 0).toString();
+    amountController.text = (course.amount).toString();
+
     chapters.assignAll(course.data.cast<Map<String, dynamic>>());
 
     Get.toNamed(AppRoutes.courseAddForm, arguments: course.id);
@@ -107,8 +137,11 @@ class CourseAddController extends GetxController {
   void clearTextFields() {
     titleController.clear();
     typeController.clear();
+    hoursController.clear();
     descriptionController.clear();
     courseByController.clear();
+    originalAmountController.clear();
+    amountController.clear();
     chapters.clear();
 
     imageUrl.value = "";

@@ -9,6 +9,7 @@ final Rx<UserModel> userData = UserModel(
   image: "",
   email: "",
   courses: [],
+  favCourses: [],
 ).obs;
 
 final RxMap currentCourse = {}.obs;

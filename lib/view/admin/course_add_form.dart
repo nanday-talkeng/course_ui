@@ -34,7 +34,7 @@ class CourseAddForm extends StatelessWidget {
                   child: InkWell(
                     onTap: () {},
                     child: AspectRatio(
-                      aspectRatio: 4 / 3,
+                      aspectRatio: 16 / 9,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Obx(
@@ -81,18 +81,41 @@ class CourseAddForm extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: cac.typeController,
-                  decoration: InputDecoration(
-                    labelText: "Type",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'This field is required';
-                    }
-                    return null;
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: cac.typeController,
+                        decoration: InputDecoration(
+                          labelText: "Type",
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'This field is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: cac.hoursController,
+                        decoration: InputDecoration(
+                          labelText: "Hours",
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'This field is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -127,6 +150,84 @@ class CourseAddForm extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 16),
+                Obx(
+                  () => Row(
+                    children: [
+                      Text("Is Free: "),
+                      DropdownButton<String>(
+                        value: cac.isFree.value,
+                        items: cac.items
+                            .map(
+                              (item) => DropdownMenuItem(
+                                value: item,
+                                child: Text(item),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) cac.isFree.value = value;
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Visibility(
+                        visible: cac.isFree.value == "No",
+                        child: Expanded(
+                          child: TextFormField(
+                            controller: cac.originalAmountController,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Original Amt.",
+                              hintText: "0",
+                              prefixText: "₹ ",
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (cac.isFree.value == "No") {
+                                if (value == null || value.isEmpty) {
+                                  return 'This field is required';
+                                }
+                                final amount = int.tryParse(value);
+                                if (amount == null || amount <= 0) {
+                                  return 'Amount should be greater than 0';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Visibility(
+                        visible: cac.isFree.value == "No",
+                        child: Expanded(
+                          child: TextFormField(
+                            controller: cac.amountController,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Current Amt.",
+                              hintText: "0",
+                              prefixText: "₹ ",
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (cac.isFree.value == "No") {
+                                if (value == null || value.isEmpty) {
+                                  return 'This field is required';
+                                }
+                                final amount = int.tryParse(value);
+                                if (amount == null || amount <= 0) {
+                                  return 'Amount should be greater than 0';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
 
                 Text("Tags"),
                 Obx(
@@ -136,6 +237,7 @@ class CourseAddForm extends StatelessWidget {
                     children: cac.tags.map((tag) {
                       return InputChip(
                         label: Text(tag),
+                        side: BorderSide(color: Colors.blue.withOpacity(0.5)),
                         deleteIcon: Icon(Icons.close),
                         onDeleted: () {
                           cac.tags.remove(tag);
@@ -150,7 +252,6 @@ class CourseAddForm extends StatelessWidget {
                     Expanded(
                       child: TextFormField(
                         controller: cac.tagAdd,
-
                         decoration: InputDecoration(
                           hintText: "Tag",
                           border: OutlineInputBorder(),

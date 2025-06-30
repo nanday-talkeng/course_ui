@@ -63,6 +63,26 @@ class ListController extends GetxController {
     }
   }
 
+  Future<void> addtoFavourites(String id) async {
+    try {
+      if (userData.value.favCourses.contains(id)) {
+        _firestore.collection("Users").doc(userId).set({
+          "fav_courses": FieldValue.arrayRemove([id]),
+        }, SetOptions(merge: true));
+        userData.value.favCourses.remove(id);
+      } else {
+        _firestore.collection("Users").doc(userId).set({
+          "fav_courses": FieldValue.arrayUnion([id]),
+        }, SetOptions(merge: true));
+        userData.value.favCourses.add(id);
+      }
+      userData.refresh();
+      courseList.refresh();
+    } catch (e) {
+      log("addtoFavourites exception: $e");
+    }
+  }
+
   RxList<Map> userCourseProgress = <Map>[].obs;
 
   Future<void> getUserCourses() async {

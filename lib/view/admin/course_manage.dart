@@ -16,6 +16,7 @@ class CourseManage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Admin")),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           cac.clearTextFields();

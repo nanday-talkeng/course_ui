@@ -3,6 +3,7 @@ import 'package:course_ui/controllers/list_controller.dart';
 import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating/flutter_rating.dart';
 import 'package:get/get.dart';
 import '../../data/course_data.dart';
 import '../../data/user_data.dart';
@@ -34,86 +35,175 @@ class CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        startCourse(item);
-      },
-
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.withAlpha(85)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-
-        child: Row(
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadiusGeometry.only(
-                    topLeft: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
-                  ),
-                  child: CachedNetworkImage(
-                    imageUrl: item.image,
-                    fit: BoxFit.cover,
-                    height: 100,
-                    width: 120,
-                  ),
-                ),
-                Positioned(
-                  top: 4,
-                  left: 4,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: item.isFree ? Colors.green : Colors.amber,
-                    child: Text(
-                      item.isFree ? "Free" : "Paid",
-                      style: TextStyle(fontSize: 12, color: Colors.white),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.withAlpha(85)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadiusGeometry.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: CachedNetworkImage(
+                imageUrl: item.image,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          item.type,
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            lc.addtoFavourites(item.id);
+                          },
+                          child: Icon(
+                            userData.value.favCourses.contains(item.id)
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_outline,
+                            color: userData.value.favCourses.contains(item.id)
+                                ? Colors.red
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    Text(
+                      item.title,
+                      style: TextStyle(
+                        height: 1.2,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      "By ${item.courseBy}",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "${item.rating} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                        StarRating(
+                          rating: item.rating,
+                          color: Colors.amber,
+                          size: 18,
+                        ),
+                        Text(
+                          " (${item.ratingCount})",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 12),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Icon(Icons.school_rounded, size: 18, color: Colors.red),
+                Text(
+                  " ${item.data.length} Chapters",
+                  style: TextStyle(fontSize: 12),
+                ),
+                Spacer(),
+                Icon(Icons.timer_rounded, size: 18, color: Colors.red),
+                Text(" ${item.hours} Hours", style: TextStyle(fontSize: 12)),
+                Spacer(),
+                Icon(Icons.group_rounded, size: 18, color: Colors.red),
+                Text(
+                  " ${item.enrolled} Enrolled",
+                  style: TextStyle(fontSize: 12),
                 ),
               ],
             ),
-            const SizedBox(width: 12.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.type,
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Visibility(
+                  visible:
+                      (item.originalAmount != 0) ||
+                      (item.originalAmount != item.amount),
+                  child: Text(
+                    "₹${item.originalAmount} ",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    item.title,
-                    style: TextStyle(
-                      height: 1.2,
-                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey,
                       fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
-                    "By ${item.courseBy}",
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                Text(
+                  item.isFree ? "Free" : " ₹${item.amount}",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: item.isFree ? Colors.green : Colors.black,
                   ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    "${item.rating}⭐",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                ),
+                Spacer(),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    startCourse(item);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: BorderSide(color: Colors.red),
                   ),
-                ],
-              ),
+                  icon: Icon(Icons.dashboard_rounded),
+                  label: Text("View Details"),
+                ),
+              ],
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
-            SizedBox(width: 12),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

@@ -12,7 +12,10 @@ class CourseModel {
   final List<String> tags;
   final String type;
   final bool isFree;
+  final int? originalAmount;
   final int amount;
+  final int? hours;
+  final int? enrolled;
 
   CourseModel({
     required this.rating,
@@ -28,7 +31,10 @@ class CourseModel {
     required this.tags,
     required this.type,
     required this.isFree,
+    this.originalAmount,
     required this.amount,
+    this.hours,
+    this.enrolled,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -47,8 +53,11 @@ class CourseModel {
           .toList(),
       tags: List<String>.from(json['tags']),
       type: json['type'],
-      isFree: json['isFree'],
-      amount: json['amount'],
+      isFree: json['isFree'] ?? true,
+      originalAmount: json['original_amount'] ?? 0,
+      amount: json['amount'] ?? 0,
+      hours: json['hours'] ?? 0,
+      enrolled: json['enrolled'] ?? 0,
     );
   }
 }

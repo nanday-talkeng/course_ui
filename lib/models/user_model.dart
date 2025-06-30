@@ -5,6 +5,7 @@ class UserModel {
   final String image;
   final List<dynamic>
   courses; // You can change this to List<String> or List<CourseModel> if needed
+  final List<dynamic> favCourses;
 
   UserModel({
     required this.uid,
@@ -12,6 +13,7 @@ class UserModel {
     required this.email,
     required this.image,
     required this.courses,
+    required this.favCourses,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,7 @@ class UserModel {
       email: json['email'] ?? '',
       image: json['image'] ?? '',
       courses: json['courses'] ?? [],
+      favCourses: json['fav_courses'] ?? [],
     );
   }
 
@@ -31,6 +34,7 @@ class UserModel {
       'email': email,
       'image': image,
       'courses': courses,
+      'fav_courses': favCourses,
     };
   }
 }

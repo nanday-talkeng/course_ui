@@ -90,6 +90,10 @@ class CourseController extends GetxController {
     try {
       WriteBatch _batch = _firestore.batch();
 
+      _batch.set(_firestore.collection("Courses").doc(id), {
+        "enrolled": FieldValue.increment(1),
+      }, SetOptions(merge: true));
+
       _batch.set(_firestore.collection("Users").doc(userId), {
         "courses": FieldValue.arrayUnion([id]),
       }, SetOptions(merge: true));
@@ -103,6 +107,8 @@ class CourseController extends GetxController {
       );
 
       await _batch.commit();
+
+      userData.refresh();
     } catch (e) {
       log("addtoMyCourses exception: $e");
     }
