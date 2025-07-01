@@ -39,14 +39,18 @@ dependencies:
   youtube_player_flutter: ^9.1.1
   iconsax_flutter: ^1.0.0
   fluttertoast: ^8.2.12
-  firebase_core: ^3.13.1
-  cloud_firestore: ^5.6.8
   cached_network_image: ^3.4.1
-  firebase_database: ^11.3.6
   firebase_ui_firestore: ^1.7.1
   flutter_rating: ^2.0.2
   get_storage: ^2.1.1
   razorpay_flutter: ^1.4.0
+  carousel_slider: ^5.1.1
+  readmore: ^3.0.0
+  image_picker: ^1.1.2
+  firebase_core: ^3.13.0
+  cloud_firestore: ^5.6.8
+  firebase_database: ^11.3.5
+  firebase_storage: ^12.4.6
 
 dev_dependencies:
   flutter_test:

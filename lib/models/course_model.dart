@@ -5,7 +5,8 @@ class CourseModel {
   final String courseBy;
   final String id;
   final String reviewCollection;
-  final String image;
+  final List image;
+  final String? video;
   final String title;
   final String description;
   final List<FeatureModel> features;
@@ -25,6 +26,7 @@ class CourseModel {
     required this.id,
     required this.reviewCollection,
     required this.image,
+    this.video,
     required this.title,
     required this.description,
     required this.features,
@@ -45,7 +47,8 @@ class CourseModel {
       courseBy: json['course_by'],
       id: json['id'],
       reviewCollection: json['review_collection'],
-      image: json['image'],
+      image: json['image'] ?? [],
+      video: json['video'] ?? "",
       title: json['title'],
       description: json['description'],
       features: (json['features'] as List)

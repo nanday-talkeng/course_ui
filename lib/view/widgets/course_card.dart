@@ -7,6 +7,7 @@ import 'package:flutter_rating/flutter_rating.dart';
 import 'package:get/get.dart';
 import '../../data/course_data.dart';
 import '../../data/user_data.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class CourseCard extends StatelessWidget {
   CourseCard({super.key, required this.item});
@@ -45,18 +46,45 @@ class CourseCard extends StatelessWidget {
       child: Column(
         children: [
           ClipRRect(
-            borderRadius: BorderRadiusGeometry.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: CachedNetworkImage(
-                imageUrl: item.image,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
-            ),
+
+            child: item.image.length <= 1
+                ? AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: CachedNetworkImage(
+                      imageUrl: item.image[0],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  )
+                : CarouselSlider(
+                    options: CarouselOptions(
+                      autoPlay: true,
+                      viewportFraction: 1,
+                      enlargeCenterPage: false,
+                    ),
+                    items: item.image.map((url) {
+                      return Builder(
+                        builder: (BuildContext context) {
+                          return AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: CachedNetworkImage(
+                              imageUrl: url,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              placeholder: (context, url) =>
+                                  ColoredBox(color: Colors.grey),
+                              errorWidget: (context, url, error) =>
+                                  ColoredBox(color: Colors.grey),
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
           ),
           Row(
             children: [
@@ -67,16 +95,22 @@ class CourseCard extends StatelessWidget {
                   children: [
                     const SizedBox(height: 4),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Icon(
+                          Icons.account_circle_rounded,
+                          color: Colors.blue,
+                          size: 16,
+                        ),
                         Text(
-                          item.type,
+                          " ${item.courseBy}",
                           style: TextStyle(
                             color: Colors.blue,
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+
+                        Spacer(),
                         InkWell(
                           onTap: () {
                             lc.addtoFavourites(item.id);
@@ -92,6 +126,7 @@ class CourseCard extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     Text(
                       item.title,
                       style: TextStyle(
@@ -100,13 +135,15 @@ class CourseCard extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
-                    Text(
-                      "By ${item.courseBy}",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
-                      ),
-                    ),
+
+                    // Text(
+                    //   item.type,
+                    //   style: TextStyle(
+                    //     color: Colors.blue,
+                    //     fontSize: 10,
+                    //     fontWeight: FontWeight.w600,
+                    //   ),
+                    // ),
                     SizedBox(height: 4),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -116,6 +153,7 @@ class CourseCard extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
+                            color: Colors.grey,
                           ),
                         ),
                         StarRating(
@@ -139,6 +177,7 @@ class CourseCard extends StatelessWidget {
               SizedBox(width: 12),
             ],
           ),
+          const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(

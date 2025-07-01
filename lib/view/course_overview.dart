@@ -1,5 +1,6 @@
 import 'dart:developer';
-
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:course_ui/controllers/payment_gateway_controller.dart';
 import 'package:course_ui/data/course_data.dart';
 import 'package:course_ui/models/course_model.dart';
@@ -12,7 +13,9 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/instance_manager.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../data/user_data.dart';
+import 'package:readmore/readmore.dart';
 
 class CourseOverview extends StatelessWidget {
   CourseOverview({super.key});
@@ -21,317 +24,408 @@ class CourseOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("Course Overview"),
-        backgroundColor: Colors.white,
+    YoutubePlayerController ytController = YoutubePlayerController(
+      initialVideoId: courseData.video ?? "",
+      flags: const YoutubePlayerFlags(autoPlay: true),
+    );
+    return YoutubePlayerBuilder(
+      player: YoutubePlayer(
+        controller: ytController,
+        onReady: () {
+          log("YT Player ready");
+        },
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey.withAlpha(85)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            courseData.title,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Course by ",
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: courseData.courseBy,
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            courseData.description,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            height: 25,
-                            child: ListView.builder(
-                              itemCount: courseData.tags.length,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                final String item = courseData.tags[index];
-                                return tagText(
-                                  item,
-                                  [
-                                    Colors.blue.shade600,
-                                    Colors.red.shade600,
-                                    Colors.green.shade600,
-                                    Colors.amber.shade600,
-                                  ][index % 4],
-                                );
-                              },
-                            ),
+      builder: (context, player) {
+        return Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text("Course Overview"),
+            backgroundColor: Colors.white,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
                           ),
 
-                          ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: courseData.features.length,
-                            padding: EdgeInsets.all(0),
-                            physics: NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              FeatureModel item = courseData.features[index];
-                              return detailsText(
-                                item.title,
-                                item.sub,
-                                getIconData(item.icon),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _studyProgressSection(),
-                    const SizedBox(height: 16),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey.withAlpha(85)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Get.toNamed(
-                                AppRoutes.courseReviews,
-                                arguments: courseData,
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Reviews",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                          child:
+                              (courseData.video != null &&
+                                  courseData.video!.isNotEmpty)
+                              ? player
+                              : courseData.image.length <= 1
+                              ? AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: CachedNetworkImage(
+                                    imageUrl: courseData.image[0],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                )
+                              : CarouselSlider(
+                                  options: CarouselOptions(
+                                    autoPlay: true,
+                                    viewportFraction: 1,
+                                    enlargeCenterPage: false,
+                                  ),
+                                  items: courseData.image.map((url) {
+                                    return Builder(
+                                      builder: (BuildContext context) {
+                                        return AspectRatio(
+                                          aspectRatio: 16 / 9,
+                                          child: CachedNetworkImage(
+                                            imageUrl: url,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            placeholder: (context, url) =>
+                                                ColoredBox(color: Colors.grey),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    ColoredBox(
+                                                      color: Colors.grey,
+                                                    ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
                                 ),
-                                Row(
+                        ),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.grey.withAlpha(85),
+                            ),
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                courseData.title,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              RichText(
+                                text: TextSpan(
                                   children: [
-                                    Text(
-                                      "${courseData.rating.toStringAsFixed(1)} ",
+                                    TextSpan(
+                                      text: "Course by ",
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 24,
+                                        color: Colors.grey.shade600,
+                                        fontSize: 12,
                                       ),
                                     ),
-                                    StarRating(
-                                      rating: courseData.rating,
-                                      allowHalfRating: true,
-                                      color: Colors.amber,
+                                    TextSpan(
+                                      text: courseData.courseBy,
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ],
                                 ),
-                                courseData.ratingCount == 0
-                                    ? Text(
-                                        "No reviews yet",
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 12,
-                                        ),
-                                      )
-                                    : Text(
-                                        "Rated by ${courseData.ratingCount} Learners",
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              const SizedBox(height: 24),
-                              TextButton.icon(
-                                onPressed: () {
-                                  if (currentCourse['finished']) {
-                                    Get.bottomSheet(
-                                      WriteReviewBottomsheet(
-                                        course: courseData,
-                                        taskType: "New",
-                                      ),
-                                      isScrollControlled: true,
+                              ),
+                              const SizedBox(height: 4),
+                              ReadMoreText(
+                                courseData.description,
+                                trimMode: TrimMode.Line,
+                                trimLines: 4,
+                                colorClickableText: Colors.blue,
+                                trimCollapsedText: 'Show more',
+                                trimExpandedText: 'Show less',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                height: 25,
+                                child: ListView.builder(
+                                  itemCount: courseData.tags.length,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    final String item = courseData.tags[index];
+                                    return tagText(
+                                      item,
+                                      [
+                                        Colors.blue.shade600,
+                                        Colors.red.shade600,
+                                        Colors.green.shade600,
+                                        Colors.amber.shade600,
+                                      ][index % 4],
                                     );
-                                  } else {
-                                    Get.snackbar(
-                                      "Write Review",
-                                      "Complete course to share your experience",
-                                    );
-                                  }
+                                  },
+                                ),
+                              ),
+
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: courseData.features.length,
+                                padding: EdgeInsets.all(0),
+                                physics: NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  FeatureModel item =
+                                      courseData.features[index];
+                                  return detailsText(
+                                    item.title,
+                                    item.sub,
+                                    getIconData(item.icon),
+                                  );
                                 },
-                                icon: Icon(Icons.edit),
-                                label: Text("Write review"),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    InkWell(
-                      onTap: () {
-                        if (currentCourse['finished']) {
-                          Get.toNamed(
-                            AppRoutes.certificateScreen,
-                            arguments: courseData,
-                          );
-                        } else {
-                          Fluttertoast.showToast(
-                            msg: "Complete course to get Certificaate",
-                          );
-                        }
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.grey.withAlpha(85)),
-                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Course Certificate",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                        userData.value.courses.contains(courseData.id)
+                            ? _studyProgressSection()
+                            : SizedBox.shrink(),
+                        Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.only(top: 16),
+                          padding: EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.grey.withAlpha(85),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  Get.toNamed(
+                                    AppRoutes.courseReviews,
+                                    arguments: courseData,
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Reviews",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "${courseData.rating.toStringAsFixed(1)} ",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 24,
+                                          ),
+                                        ),
+                                        StarRating(
+                                          rating: courseData.rating,
+                                          allowHalfRating: true,
+                                          color: Colors.amber,
+                                        ),
+                                      ],
+                                    ),
+                                    courseData.ratingCount == 0
+                                        ? Text(
+                                            "No reviews yet",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          )
+                                        : Text(
+                                            "Rated by ${courseData.ratingCount} Learners",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                  ],
                                 ),
-                                Text(
-                                  "Issued by Agatsya Edutech Private Limited",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const SizedBox(height: 24),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      if (currentCourse['finished']) {
+                                        Get.bottomSheet(
+                                          WriteReviewBottomsheet(
+                                            course: courseData,
+                                            taskType: "New",
+                                          ),
+                                          isScrollControlled: true,
+                                        );
+                                      } else {
+                                        Get.snackbar(
+                                          "Write Review",
+                                          "Complete course to share your experience",
+                                        );
+                                      }
+                                    },
+                                    icon: Icon(Icons.edit),
+                                    label: Text("Write review"),
                                   ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        InkWell(
+                          onTap: () {
+                            if (currentCourse['finished']) {
+                              Get.toNamed(
+                                AppRoutes.certificateScreen,
+                                arguments: courseData,
+                              );
+                            } else {
+                              Fluttertoast.showToast(
+                                msg: "Complete course to get Certificaate",
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(12.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: Colors.grey.withAlpha(85),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Course Certificate",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Issued by Agatsya Edutech Private Limited",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Spacer(),
+                                Image.asset(
+                                  "images/quality.png",
+                                  height: 50,
+                                  width: 50,
                                 ),
                               ],
                             ),
-                            Spacer(),
-                            Image.asset(
-                              "images/quality.png",
-                              height: 50,
-                              width: 50,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                Visibility(
-                  visible:
-                      !courseData.isFree &&
-                      !(userData.value.courses.contains(courseData.id)),
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 32, left: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Buy for", style: TextStyle(fontSize: 12)),
-                        Text(
-                          "₹${courseData.amount.toDouble()}",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
                 ),
-                Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (courseData.isFree) {
-                          log("here 1");
-                          Get.toNamed(
-                            AppRoutes.courseScreen,
-                            arguments: courseData,
-                          );
-                        } else {
-                          if (userData.value.courses.contains(courseId.value)) {
-                            Get.toNamed(
-                              AppRoutes.courseScreen,
-                              arguments: courseData,
-                            );
-                          } else {
-                            final PaymentController pc = Get.put(
-                              PaymentController(),
-                            );
-
-                            pc.openCheckout(
-                              name: userData.value.name,
-                              contact: '',
-                              email: userData.value.email,
-                              amountInPaise: courseData.amount * 100,
-                            );
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 16),
+                  child: Row(
+                    children: [
+                      Visibility(
+                        visible:
+                            !courseData.isFree &&
+                            !(userData.value.courses.contains(courseData.id)),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 32, left: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Buy for", style: TextStyle(fontSize: 12)),
+                              Text(
+                                "₹${courseData.amount.toDouble()}",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: Text("START LEARNING"),
-                    ),
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (courseData.isFree) {
+                                Get.toNamed(
+                                  AppRoutes.courseScreen,
+                                  arguments: courseData,
+                                );
+                              } else {
+                                if (userData.value.courses.contains(
+                                  courseId.value,
+                                )) {
+                                  Get.toNamed(
+                                    AppRoutes.courseScreen,
+                                    arguments: courseData,
+                                  );
+                                } else {
+                                  final PaymentController pc = Get.put(
+                                    PaymentController(),
+                                  );
+
+                                  pc.openCheckout(
+                                    name: userData.value.name,
+                                    contact: '',
+                                    email: userData.value.email,
+                                    amountInPaise: courseData.amount * 100,
+                                  );
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Text(
+                              userData.value.courses.contains(courseData.id)
+                                  ? "START LEARNING"
+                                  : "ENROLL NOW",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -381,6 +475,7 @@ class CourseOverview extends StatelessWidget {
   Widget _studyProgressSection() {
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.only(top: 16),
       padding: EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: Colors.white,

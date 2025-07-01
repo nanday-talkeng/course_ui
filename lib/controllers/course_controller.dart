@@ -32,7 +32,7 @@ class CourseController extends GetxController {
     courseBy: '',
     id: '',
     reviewCollection: '',
-    image: '',
+    image: [],
     title: '',
     description: '',
     features: [],

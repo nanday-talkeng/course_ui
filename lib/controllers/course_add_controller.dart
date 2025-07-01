@@ -4,6 +4,10 @@ import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/routes/app_routes.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as path;
 
 class CourseAddController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,6 +17,7 @@ class CourseAddController extends GetxController {
   final TextEditingController hoursController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController courseByController = TextEditingController();
+  final TextEditingController promoVideoController = TextEditingController();
   final TextEditingController tagAdd = TextEditingController();
 
   final TextEditingController originalAmountController =
@@ -28,7 +33,7 @@ class CourseAddController extends GetxController {
   final TextEditingController videoIdController = TextEditingController();
   final TextEditingController videoDurationController = TextEditingController();
 
-  final RxString imageUrl = "".obs;
+  final RxList imageList = [].obs;
   final RxList<String> tags = <String>[].obs;
   final RxList<FeatureModel> features = <FeatureModel>[].obs;
 
@@ -52,7 +57,8 @@ class CourseAddController extends GetxController {
             "course_by": courseByController.text,
             "features": features.map((e) => e.toJson()).toList(),
             "tags": tags,
-            "image": imageUrl.value,
+            "image": imageList,
+            "video": extractYoutubeVideoId(promoVideoController.text),
             "rating": 5,
             "rating_count": 0,
             "data": chapters,
@@ -86,7 +92,8 @@ class CourseAddController extends GetxController {
             "course_by": courseByController.text,
             "features": features.map((e) => e.toJson()).toList(),
             "tags": tags,
-            "image": imageUrl.value,
+            "image": imageList,
+            "video": extractYoutubeVideoId(promoVideoController.text),
             "data": chapters,
             "hours": int.parse(hoursController.text),
             "isFree": isFree.value == "Yes" ? true : "No",
@@ -119,7 +126,8 @@ class CourseAddController extends GetxController {
     typeController.text = course.type;
     descriptionController.text = course.description;
     courseByController.text = course.courseBy;
-    imageUrl.value = course.image;
+    imageList.value = course.image;
+    promoVideoController.text = course.video ?? "";
     tags.value = course.tags;
     features.assignAll(course.features);
 
@@ -144,18 +152,57 @@ class CourseAddController extends GetxController {
     amountController.clear();
     chapters.clear();
 
-    imageUrl.value = "";
+    imageList.clear();
     tags.clear();
     features.clear();
   }
 
+  Future<void> pickAndUploadImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (pickedFile == null) return null; // User cancelled
+
+      File imageFile = File(pickedFile.path);
+      String fileName = path.basename(imageFile.path);
+
+      // Create reference
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child("Course_thumbnail")
+          .child("${DateTime.now().millisecondsSinceEpoch}_$fileName");
+
+      // Upload
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Get download URL
+      final String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      imageList.add(downloadUrl);
+    } catch (e) {
+      log("Image upload error: $e");
+      return null;
+    }
+  }
+
   String? extractYoutubeVideoId(String url) {
     final RegExp regExp = RegExp(
-      r'(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([0-9A-Za-z_-]{11})',
+      r'(?:(?:v=)|(?:\/embed\/)|(?:\/shorts\/)|(?:youtu\.be\/))([a-zA-Z0-9_-]{11})',
       caseSensitive: false,
     );
 
     final match = regExp.firstMatch(url);
-    return match?.group(1);
+    if (match != null) return match.group(1);
+
+    // Fallback: if input looks like a video ID
+    if (RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(url)) {
+      return url;
+    }
+
+    return null;
   }
 }

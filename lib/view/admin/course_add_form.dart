@@ -29,42 +29,61 @@ class CourseAddForm extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 64),
-                  child: InkWell(
-                    onTap: () {},
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Obx(
-                          () => cac.imageUrl.value == ""
-                              ? Container(
-                                  decoration: BoxDecoration(color: Colors.grey),
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.add_rounded,
-                                          color: Colors.white,
+                Obx(
+                  () => cac.imageList.isEmpty
+                      ? uploadButton()
+                      : SizedBox(
+                          height: 100,
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: cac.imageList.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == cac.imageList.length) {
+                                return uploadButton();
+                              }
+                              return Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 6,
+                                      right: 16,
+                                    ),
+                                    child: AspectRatio(
+                                      aspectRatio: 16 / 9,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadiusGeometry.circular(10),
+                                        child: CachedNetworkImage(
+                                          imageUrl: cac.imageList[index],
+                                          fit: BoxFit.cover,
                                         ),
-                                        Text(
-                                          "Upload an Image",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                )
-                              : CachedNetworkImage(
-                                  imageUrl: cac.imageUrl.value,
-                                  fit: BoxFit.cover,
-                                ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 10,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.black.withOpacity(
+                                        0.5,
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () {
+                                          cac.imageList.removeAt(index);
+                                        },
+                                        icon: Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -148,6 +167,14 @@ class CourseAddForm extends StatelessWidget {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: cac.promoVideoController,
+                  decoration: InputDecoration(
+                    labelText: "Promo Video (Youtube Link)",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Obx(
@@ -384,6 +411,36 @@ class CourseAddForm extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget uploadButton() {
+    return InkWell(
+      onTap: () {
+        cac.pickAndUploadImage();
+      },
+
+      child: Container(
+        height: 100,
+        width: 100,
+        margin: const EdgeInsets.only(top: 4, right: 4),
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.add_rounded, color: Colors.white),
+              Text(
+                "Upload Image",
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ],
           ),
         ),
       ),

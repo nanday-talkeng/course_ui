@@ -24,6 +24,11 @@ class CourseList extends StatelessWidget {
           Obx(
             () => SegmentedButton(
               showSelectedIcon: false,
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                ),
+              ),
               segments: [
                 ButtonSegment(
                   value: "All Courses",
@@ -79,74 +84,76 @@ class CourseList extends StatelessWidget {
 
   Widget allCourseList() {
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Obx(
-          () => lc.courseList.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: lc.courseList.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final CourseModel item = CourseModel.fromJson(
-                      lc.courseList[index],
-                    );
+      child: Obx(
+        () => lc.courseList.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : ListView.separated(
+                shrinkWrap: true,
+                itemCount: lc.courseList.length,
+                padding: EdgeInsets.all(12),
+                separatorBuilder: (context, index) => SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final CourseModel item = CourseModel.fromJson(
+                    lc.courseList[index],
+                  );
 
-                    return CourseCard(item: item);
-                  },
-                ),
-        ),
+                  return CourseCard(item: item);
+                },
+              ),
       ),
     );
   }
 
   Widget purchasedCourseList() {
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Obx(
-          () => lc.courseList.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : ListView.separated(
-                  itemCount: lc.courseList.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final CourseModel item = CourseModel.fromJson(
-                      lc.courseList[index],
-                    );
+      child: Obx(
+        () => lc.courseList.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : ListView.separated(
+                itemCount: lc.courseList.length,
+                padding: const EdgeInsets.all(12.0),
+                separatorBuilder: (context, index) => SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final CourseModel item = CourseModel.fromJson(
+                    lc.courseList[index],
+                  );
 
-                    return userData.value.courses.contains(item.id)
-                        ? CourseCard(item: item)
-                        : SizedBox.shrink();
-                  },
-                ),
-        ),
+                  return userData.value.courses.contains(item.id)
+                      ? CourseCard(item: item)
+                      : SizedBox.shrink();
+                },
+              ),
       ),
     );
   }
 
   Widget myFavList() {
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Obx(
-          () => lc.courseList.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : ListView.separated(
-                  itemCount: lc.courseList.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final CourseModel item = CourseModel.fromJson(
-                      lc.courseList[index],
-                    );
+      child: Obx(
+        () => lc.courseList.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : ListView.separated(
+                itemCount: lc.courseList.length,
+                padding: EdgeInsets.all(12),
+                separatorBuilder: (context, index) {
+                  final CourseModel item = CourseModel.fromJson(
+                    lc.courseList[index],
+                  );
 
-                    return userData.value.favCourses.contains(item.id)
-                        ? CourseCard(item: item)
-                        : SizedBox.shrink();
-                  },
-                ),
-        ),
+                  return userData.value.favCourses.contains(item.id)
+                      ? SizedBox(height: 12)
+                      : SizedBox.shrink();
+                },
+                itemBuilder: (context, index) {
+                  final CourseModel item = CourseModel.fromJson(
+                    lc.courseList[index],
+                  );
+
+                  return userData.value.favCourses.contains(item.id)
+                      ? CourseCard(item: item)
+                      : SizedBox.shrink();
+                },
+              ),
       ),
     );
   }
