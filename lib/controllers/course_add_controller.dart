@@ -164,7 +164,7 @@ class CourseAddController extends GetxController {
         source: ImageSource.gallery,
       );
 
-      if (pickedFile == null) return null; // User cancelled
+      if (pickedFile == null) return; // User cancelled
 
       File imageFile = File(pickedFile.path);
       String fileName = path.basename(imageFile.path);
@@ -185,7 +185,7 @@ class CourseAddController extends GetxController {
       imageList.add(downloadUrl);
     } catch (e) {
       log("Image upload error: $e");
-      return null;
+      return;
     }
   }
 

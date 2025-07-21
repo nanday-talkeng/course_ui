@@ -88,17 +88,17 @@ class CourseController extends GetxController {
 
   Future<void> addtoMyCourses(String id) async {
     try {
-      WriteBatch _batch = _firestore.batch();
+      WriteBatch batch = _firestore.batch();
 
-      _batch.set(_firestore.collection("Courses").doc(id), {
+      batch.set(_firestore.collection("Courses").doc(id), {
         "enrolled": FieldValue.increment(1),
       }, SetOptions(merge: true));
 
-      _batch.set(_firestore.collection("Users").doc(userId), {
+      batch.set(_firestore.collection("Users").doc(userId), {
         "courses": FieldValue.arrayUnion([id]),
       }, SetOptions(merge: true));
 
-      _batch.set(
+      batch.set(
         _firestore.collection("user_course_progress").doc(userId),
         {
           id: {"current_stage": 0, "finished": false, "sub_stage": 0},
@@ -106,7 +106,7 @@ class CourseController extends GetxController {
         SetOptions(merge: true),
       );
 
-      await _batch.commit();
+      await batch.commit();
 
       userData.refresh();
     } catch (e) {
