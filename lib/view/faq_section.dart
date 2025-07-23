@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:course_ui/data/course_data.dart';
 import 'package:course_ui/data/user_data.dart';
 import 'package:course_ui/models/course_model.dart';
 import 'package:flutter/material.dart';
@@ -12,20 +13,27 @@ class FaqSection extends StatelessWidget {
 
   final CourseModel course;
 
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final List availableTimes = [
-    "9:00 AM",
-    "9:30 AM",
     "10:00 AM",
-    "10:30 AM",
     "11:00 AM",
+    "12:00 PM",
+    "1:00 PM",
+    "2:00 PM",
+    "3:00 PM",
+    "4:00 PM",
+    "5:00 PM",
+    "6:00 PM",
+    "7:00 PM",
     "8:00 PM",
     "9:00 PM",
-    "10:00 PM",
-    "11:00 PM",
   ];
 
   final Rx<dynamic> selectedDate = DateTime.now().obs;
   final Rx<dynamic> selectedTime = "".obs;
+
+  final RxList alreadyBooked = [].obs;
 
   final TextEditingController noteController = TextEditingController();
 
@@ -115,12 +123,24 @@ class FaqSection extends StatelessWidget {
                 final formatted = "${date.day}";
                 return Obx(
                   () => InkWell(
-                    onTap: () {
+                    onTap: () async {
                       selectedDate.value = DateTime(
                         date.year,
                         date.month,
                         date.day,
                       );
+
+                      await _firestore
+                          .collection("course_doubt_session")
+                          .where("selected_date", isEqualTo: selectedDate.value)
+                          .get()
+                          .then((snapshot) {
+                            alreadyBooked.clear();
+                            for (var s in snapshot.docs) {
+                              alreadyBooked.add(s.data()['selected_time']);
+                            }
+                            log(alreadyBooked.toString());
+                          });
                     },
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
@@ -200,15 +220,25 @@ class FaqSection extends StatelessWidget {
               return Obx(
                 () => InkWell(
                   onTap: () {
-                    selectedTime.value = availableTimes[index];
+                    if (alreadyBooked.contains(availableTimes[index])) {
+                      Fluttertoast.showToast(msg: "Slot already booked.");
+                    } else {
+                      selectedTime.value = availableTimes[index];
+                    }
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: selectedTime.value == availableTimes[index]
+                      color: alreadyBooked.contains(availableTimes[index])
+                          ? Colors.grey.shade50
+                          : selectedTime.value == availableTimes[index]
                           ? Colors.orange
                           : Colors.orange.shade50,
-                      border: Border.all(color: Colors.orange),
+                      border: Border.all(
+                        color: alreadyBooked.contains(availableTimes[index])
+                            ? Colors.grey
+                            : Colors.orange,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -216,7 +246,9 @@ class FaqSection extends StatelessWidget {
                         availableTimes[index],
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: selectedTime.value == availableTimes[index]
+                          color: alreadyBooked.contains(availableTimes[index])
+                              ? Colors.grey
+                              : selectedTime.value == availableTimes[index]
                               ? Colors.white
                               : Colors.orange,
                         ),
@@ -254,21 +286,45 @@ class FaqSection extends StatelessWidget {
                   } else if (selectedTime.value == "") {
                     Fluttertoast.showToast(msg: "Please select a time.");
                   } else {
-                    log("message");
                     String id = Timestamp.now().millisecondsSinceEpoch
                         .toString();
+
+                    WriteBatch batch = _firestore.batch();
+
+                    batch.set(
+                      _firestore.collection("user_course_progress").doc(userId),
+                      {
+                        courseId.value: {
+                          "doubt_sessions": FieldValue.increment(-1),
+                        },
+                      },
+                      SetOptions(merge: true),
+                    );
+
+                    batch.set(
+                      _firestore.collection("course_doubt_session").doc(id),
+                      {
+                        'id': id,
+                        'selected_date': selectedDate.value,
+                        'selected_time': selectedTime.value,
+                        'course_id': course.id,
+                        'note': noteController.text == ""
+                            ? "NA"
+                            : noteController.text.trim(),
+                        'uid': userId, // Replace with actual user ID
+                        'created_at': Timestamp.now(),
+                      },
+                      SetOptions(merge: true),
+                    );
+
                     try {
-                      await FirebaseFirestore.instance
-                          .collection("course_doubt_session")
-                          .doc(id)
-                          .set({
-                            'id': id,
-                            'selected_date': selectedDate.value,
-                            'selected_time': selectedTime.value,
-                            'course_id': course.id,
-                            'note': noteController.text,
-                            'uid': 'user_id', // Replace with actual user ID
-                          }, SetOptions(merge: true));
+                      await batch.commit();
+                      selectedDate.value = DateTime.now();
+                      selectedTime.value = "";
+                      Fluttertoast.showToast(
+                        msg: "Session booked successfully.",
+                      );
+                      currentCourse['doubt_sessions']--;
                     } catch (e) {
                       log("Error booking session: $e");
                       Fluttertoast.showToast(msg: "Failed to book session.");
