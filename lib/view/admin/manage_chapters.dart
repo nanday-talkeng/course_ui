@@ -18,7 +18,7 @@ class ManageChapters extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Chapters/Videos"),
+        title: Text("Manage Chapters/Videos:"),
         backgroundColor: Colors.white,
       ),
       body: Column(
