@@ -64,7 +64,7 @@ class ReviewController extends GetxController {
         userId: {
           "rating": newRating,
           "review": reviewText.text.trim(),
-          "time": Timestamp.now(),
+          "time": FieldValue.serverTimestamp(),
           "uid": userData.value.uid,
           "name": userData.value.name,
           "image": userData.value.image,
@@ -74,7 +74,7 @@ class ReviewController extends GetxController {
       reviewList.add({
         "rating": newRating,
         "review": reviewText.text.trim(),
-        "time": Timestamp.now(),
+        "time": FieldValue.serverTimestamp(),
         "uid": userData.value.uid,
         "name": userData.value.name,
         "image": userData.value.image,

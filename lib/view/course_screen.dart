@@ -3,7 +3,7 @@ import 'package:course_ui/controllers/course_controller.dart';
 import 'package:course_ui/data/user_data.dart';
 import 'package:course_ui/models/course_model.dart';
 import 'package:course_ui/view/faq_section.dart';
-import 'package:course_ui/view/progress_tile.dart';
+import 'package:course_ui/view/widgets/progress_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -54,7 +54,8 @@ class CourseScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
-              title: Text(cc.course.value.title),
+              title: Text(course.title),
+              centerTitle: true,
               actions: [
                 IconButton(
                   onPressed: () {

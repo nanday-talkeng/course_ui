@@ -215,7 +215,7 @@ class CourseController extends GetxController {
                   "current_stage": currentProgress.value,
                   "sub_stage": subProgress.value,
                   "finished": true,
-                  "finished_time": Timestamp.now(),
+                  "finished_time": FieldValue.serverTimestamp(),
                 },
               }, SetOptions(merge: true))
               .then((_) {

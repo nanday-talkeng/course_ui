@@ -22,6 +22,7 @@ class ProgressTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border.all(color: Colors.grey.withAlpha(85)),
         borderRadius: BorderRadius.circular(8),
       ),

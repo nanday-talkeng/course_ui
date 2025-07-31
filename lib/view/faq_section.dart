@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:course_ui/data/course_data.dart';
 import 'package:course_ui/data/user_data.dart';
@@ -48,50 +48,16 @@ class FaqSection extends StatelessWidget {
             "Meet Your Mentor",
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              border: Border.all(color: Colors.green),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey,
-                  ),
-                  child: Icon(
-                    Icons.person,
-                    size: 80,
-                    color: Colors.white.withAlpha(200),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        course.courseBy,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Eiusmod officia nulla esse laborum amet. Ex cillum consectetur exercitation occaecat elit et nisi dolor est labore ex. Deserunt consequat ea veniam aliquip. Qui fugiat nulla nisi ad incididunt tempor aliqua nostrud eiusmod anim. Ullamco commodo aliquip aliquip ea fugiat aliquip duis proident consequat laborum amet reprehenderit et. Eu enim commodo duis laborum voluptate aute magna anim consectetur enim dolor sunt.",
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          SizedBox(
+            height: 100,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: course.support!.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                final Map item = course.support![index];
+                return tutorCard(context, item);
+              },
             ),
           ),
           const SizedBox(height: 16),
@@ -312,7 +278,7 @@ class FaqSection extends StatelessWidget {
                             ? "NA"
                             : noteController.text.trim(),
                         'uid': userId, // Replace with actual user ID
-                        'created_at': Timestamp.now(),
+                        'created_at': FieldValue.serverTimestamp(),
                       },
                       SetOptions(merge: true),
                     );
@@ -339,6 +305,51 @@ class FaqSection extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
               child: Text("Book Session"),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget tutorCard(BuildContext context, Map tutorDetails) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        border: Border.all(color: Colors.green),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadiusGeometry.circular(40),
+            child: CachedNetworkImage(
+              imageUrl: tutorDetails['image'] ?? "-",
+              height: 80,
+              width: 80,
+              placeholder: (context, url) => ColoredBox(color: Colors.grey),
+              errorWidget: (context, url, error) =>
+                  ColoredBox(color: Colors.grey),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tutorDetails['name'] ?? "-",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  tutorDetails['description'] ?? "-",
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ],
             ),
           ),
         ],

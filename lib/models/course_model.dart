@@ -17,6 +17,7 @@ class CourseModel {
   final int amount;
   final int? hours;
   final int? enrolled;
+  final List? support;
 
   CourseModel({
     required this.rating,
@@ -37,6 +38,7 @@ class CourseModel {
     required this.amount,
     this.hours,
     this.enrolled,
+    this.support,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,7 @@ class CourseModel {
       amount: json['amount'] ?? 0,
       hours: json['hours'] ?? 0,
       enrolled: json['enrolled'] ?? 0,
+      support: json['support'] ?? [],
     );
   }
 }
